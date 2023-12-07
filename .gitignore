@@ -1,0 +1,5 @@
+PrintedDatasetErrorCalculation
+__pycache__
+*.zip
+*.obj
+src/train/dataset
