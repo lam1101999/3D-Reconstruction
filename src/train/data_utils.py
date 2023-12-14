@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 import sys
+from torch_sparse import coalesce
 
 def center_and_scale(points: np.array, ev_indices: np.array, s_type=0):
     """
@@ -24,7 +25,7 @@ def center_and_scale(points: np.array, ev_indices: np.array, s_type=0):
 	- float
 		The scaling factor applied to the points.
 	"""
-    centroid = np.mean(points, dim=0, keepdim=True)
+    centroid = np.mean(points, axis=0, keepdims=True)
     points = points - centroid
 
     if s_type == 0 : # Average edge length
@@ -105,7 +106,7 @@ def get_submesh(fv_indices, select_faces):
     v_idx = []
     f = np.zeros_like(all_vertex, dtype=np.int32)
     
-    vertex_flag = np.ones(n_vertex, stype=np.int32)*-1
+    vertex_flag = np.ones(n_vertex, dtype=np.int32)*-1
     for i, v in enumerate(all_vertex):
         if vertex_flag[v] < 0:
             vertex_flag[v] = len(v_idx)
@@ -114,3 +115,96 @@ def get_submesh(fv_indices, select_faces):
         else:
             f[i] = vertex_flag[v]
     return np.array(v_idx), f.reshape(len(select_faces), 3)
+
+def build_edge_fv(fv_indices):
+    """
+    Generate the edge index for the given face-vertex indices.
+
+    Parameters:
+        fv_indices (torch.Tensor): The face-vertex indices of shape (num_faces, 3).
+
+    Returns:
+        torch.Tensor: The edge index of shape (2, num_faces * 3). the first rows denote the index of face and the second rows denote the index its edge
+
+    """
+    num_faces = fv_indices.shape[0]
+    
+    edge_i, _ = torch.meshgrid(torch.arange(num_faces), torch.arange(3), indexing="ij")
+    edge_i = edge_i.flatten()
+    edge_j = fv_indices.flatten()
+    
+    edge_index = torch.stack([edge_i, edge_j], 0)
+    return edge_index
+
+def calc_weight(node_position, node_normal, edge_index):
+    """
+    Calculate the weight of a edge based on its vertex position, vertex normal, and edge index.
+
+    Parameters:
+    - node_position (torch.Tensor): The position of the node
+    - node_normal (torch.Tensor): The normal of the node
+    - edge_index (torch.Tensor): The index of the edge
+
+    Returns:
+    - torch.Tensor: The weight of the node
+    """
+    
+    eps = 0.001
+    edge_len = node_position[edge_index]
+    edge_len = ((edge_len[0] - edge_len[1])**2).sum(1)**0.5
+    edge_len_mean = edge_len.mean()
+    
+    normal_pair = node_normal[edge_index]
+    dn = (normal_pair[0] * normal_pair[1]).sum(1) # dot product of normal_pair
+    dp = (edge_len/(-2*edge_len_mean+1e-12)).exp()
+    return torch.clamp(dn,eps)*dp
+
+def build_facet_graph(fv_indices, vf_indices):
+    """
+    Build the facet graph from the given vertex-face indices.
+    
+    Args:
+        fv_indices (Tensor): The indices of vertices for each face.
+        vf_indices (Tensor): The indices of faces for each vertex.
+        
+    Returns:
+        torch.Tensor[2, num_pairs]: The edge indices of the facet graph.
+                The first rows denotes the index of face and the second rows denote the index of neighbor face
+    """
+    
+    fv_indices = fv_indices.long()
+    vf_indices = vf_indices.long()
+    
+    num_faces = fv_indices.shape[0]
+    num_neighbors = vf_indices.shape[1] *3
+    
+    edge_i, _ = torch.meshgrid(torch.arange(num_faces), torch.arange(num_neighbors), indexing="ij")
+    edge_j = vf_indices[fv_indices,:] # if there are no valid face, it is denoted -1
+    edge_i = edge_i.flatten()
+    edge_j = edge_j.flatten()
+    valid_idx = torch.where(edge_j >= 0)[0] # remove invalid pairs (index==-1)
+    edge_index = torch.stack([edge_i[valid_idx], edge_j[valid_idx]], 0) # here the edge_index still include repetitive pairs
+    edge_index, _ = coalesce(edge_index, None, num_faces, num_faces)  # remove repetitive pairs
+    return edge_index
+
+def compute_face_normal(points, fv_indices):
+    """
+    Compute the face normal of a 3D object given the points and face vertex indices.
+
+    Parameters:
+        points (ndarray): The array of points representing the 3D object. Shape: (num_points x 3).
+        fv_indices (ndarray): The array of face vertex indices. Shape: (num_faces x 3).
+
+    Returns:
+        ndarray or Tensor: The computed face normals. If `fv_indices` is an ndarray, the return type is ndarray with shape (num_faces x 3). If `fv_indices` is a Tensor, the return type is Tensor with shape (num_faces x 3).
+    """
+    
+    fv = points[fv_indices] # (num_faces x 3 x 3)
+    if isinstance(fv, np.ndarray):
+        N = np.cross(fv[:, 1] - fv[:, 0], fv[:, 2] - fv[:, 0]) # Cross product is perpendicular to the plane (num_faces x 3)
+        d = np.clip((N**2).sum(1, keepdims=True)**0.5, 1e-12, None)
+        N /= d
+    elif isinstance(fv, torch.Tensor):
+        N = torch.cross(fv[:, 1] - fv[:, 0], fv[:, 2] - fv[:, 0])
+        N = torch.nn.functional.normalize(N, dim=1)
+    return N
