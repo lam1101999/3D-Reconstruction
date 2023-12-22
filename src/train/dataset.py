@@ -233,7 +233,6 @@ class DualDataset(torch_geometric.data.Dataset):
         ev_indices = torch.from_numpy(noisy_mesh.ev_indices()).long()
         fv_indices = torch.from_numpy(noisy_mesh.fv_indices()).long()
         vf_indices = torch.from_numpy(noisy_mesh.vf_indices()).long()
-        vv_indices = torch.from_numpy(noisy_mesh.vv_indices()).long()
         
         edge_dual_fv = data_utils.build_edge_fv(fv_indices)
         

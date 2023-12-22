@@ -151,8 +151,10 @@ def calc_weight(node_position, node_normal, edge_index):
     
     eps = 0.001
     edge_len = node_position[edge_index]
-    edge_len = ((edge_len[0] - edge_len[1])**2).sum(1)**0.5
-    edge_len_mean = edge_len.mean()
+    # edge_len = ((edge_len[0] - edge_len[1])**2).sum(1)**0.5 # Warning this code is differnet with original one
+    # edge_len_mean = edge_len.mean()
+    edge_len = ((edge_len[0] - edge_len[1])**2).sum(1) # Warning this code is differnet with original one
+    edge_len_mean = (edge_len**0.5).mean()
     
     normal_pair = node_normal[edge_index]
     dn = (normal_pair[0] * normal_pair[1]).sum(1) # dot product of normal_pair

@@ -96,8 +96,9 @@ def train(opt):
     random.seed(opt.seed)
     np.random.seed(opt.seed)
     torch.manual_seed(opt.seed)
-    torch.cuda.manual_seed(optseed)
-    torch.backends.cudnn.deterministic = True   
+    torch.cuda.manual_seed(opt.seed)
+    torch.backends.cudnn.deterministic = True
+    
     # 1. Prepare path
     CODE_DIR = os.path.dirname(os.path.abspath(__file__))
     LOG_DIR = os.path.join(CODE_DIR,"log")
@@ -120,6 +121,7 @@ def train(opt):
     print("==="*30)
     train_dataset = DualDataset(opt.data_type, train_or_test="train", filter_patch_count=opt.filter_patch_count, submesh_size=opt.sub_size, transform = RandomRotate(False))
     train_dataset_loader = DataLoader(train_dataset, shuffle=True, collate_fn=Collater([]))
+    a = train_dataset[0]
     eval_dataset =DualDataset(opt.data_type, train_or_test="test", filter_patch_count=opt.filter_patch_count, submesh_size=opt.sub_size)
     print(f"train_dataset:{len(train_dataset):>4} samples")
     print(f"Testing set:{len(eval_dataset):>4} samples")
