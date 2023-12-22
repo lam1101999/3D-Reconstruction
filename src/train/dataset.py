@@ -6,8 +6,59 @@ import openmesh as om
 import numpy as np
 import data_utils
 import torch
-
+from torch_geometric.utils import to_undirected, add_self_loops
 from tqdm import tqdm
+from torch_geometric.data import Data, Batch
+
+class Collater(object):
+    def __init__(self, follow_batch):
+        self.follow_batch = follow_batch
+
+    def collate(self, batch):
+        elem = batch[0]
+        if isinstance(elem, Data):
+            return Batch.from_data_list(batch, self.follow_batch)
+        elif isinstance(elem, float):
+            return torch.tensor(batch, dtype=torch.float)
+        elif isinstance(elem, tuple):
+            return elem
+
+        raise TypeError('DataLoader found invalid type: {}'.format(type(elem)))
+
+    def __call__(self, batch):
+        return self.collate(batch)
+
+class RandomRotate(object):
+    def __init__(self, z_rotated=True):
+        self.z_rotated = z_rotated
+
+    def __call__(self, data):
+        # rotation
+        angles = np.random.uniform(size=(3)) * 2 * np.pi
+        Rx = np.array([[1, 0, 0],
+                       [0, np.cos(angles[0]), -np.sin(angles[0])],
+                       [0, np.sin(angles[0]), np.cos(angles[0])]])
+        Ry = np.array([[np.cos(angles[1]), 0, np.sin(angles[1])],
+                       [0, 1, 0],
+                       [-np.sin(angles[1]), 0, np.cos(angles[1])]])
+        Rz = np.array([[np.cos(angles[2]), -np.sin(angles[2]), 0],
+                       [np.sin(angles[2]), np.cos(angles[2]), 0],
+                       [0, 0, 1]])
+        rotation_matrix = Rz if self.z_rotated else np.dot(Rz, np.dot(Ry, Rx))
+        rotation_matrix = torch.from_numpy(rotation_matrix).to(data[0].y.dtype).to(data[0].y.device)
+
+        for d in data:
+            d.x[:, 0:3] = torch.matmul(d.x[:, 0:3], rotation_matrix)
+            d.x[:, 3:6] = torch.matmul(d.x[:, 3:6], rotation_matrix)
+            d.y[:, 0:3] = torch.matmul(d.y[:, 0:3], rotation_matrix)
+            if hasattr(d, 'pos') and d.pos is not None:
+                d.pos = torch.matmul(d.pos, rotation_matrix)
+            if hasattr(d, 'centroid') and d.centroid is not None:
+                d.centroid = torch.matmul(d.centroid, rotation_matrix)
+            if hasattr(d, 'depth_direction') and d.depth_direction is not None:
+                d.depth_direction = torch.matmul(d.depth_direction, rotation_matrix)
+
+        return data
 
 class DualDataset(torch_geometric.data.Dataset):
     def __init__(self, data_type, train_or_test="train",filter_patch_count=0, submesh_size=sys.maxsize, transform=None):
@@ -60,6 +111,15 @@ class DualDataset(torch_geometric.data.Dataset):
         return original_files, noisy_files
                 
     def process_data(self):
+        """
+        Process the data by creating a processed directory, iterating over the noisy files, and calling the `process_one_data` method for each file.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
         print("Processing...")
         os.makedirs(self.processed_dir, exist_ok=True)
         bar_format = "{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}] {postfix}"
@@ -67,7 +127,7 @@ class DualDataset(torch_geometric.data.Dataset):
         for i, (original_file, noisy_file) in enumerate(zip(self.original_files, self.noisy_files)):
             pbar.postfix = os.path.basename(original_file)[:-4]
             pbar.update(1)
-            self.process_one_data(noisy_file, self.submesh_size,original_file=original_file)
+            self.process_one_data(noisy_file, self.submesh_size,original_file=original_file, obj=self)
         pbar.close()
         print("Done!")
     
@@ -125,7 +185,7 @@ class DualDataset(torch_geometric.data.Dataset):
                 flag.put(select_faces, True)
                 
                 if len(select_faces) > filter_patch_count:
-                    file_name = f"{os.path.basename(noisy_file)[:-4]}-sub(submesh_size)-{seed}"
+                    file_name = f"{os.path.basename(noisy_file)[:-4]}-sub{submesh_size}-{seed}"
                     if obj is not None:
                         processed_path = os.path.join(obj.processed_dir, f"{file_name}.pt")
                         obj.processed_files.append(processed_path)
@@ -135,7 +195,7 @@ class DualDataset(torch_geometric.data.Dataset):
                         submesh_n = om.TriMesh(noisy_points[v_idx], f)
                         submesh_o = None if original_points is None else om.TriMesh(original_points[v_idx], f)
                         dual_data = DualDataset.process_one_submesh(submesh_n, file_name, submesh_o)
-                        dual_data[0].centroid = torch.from_numpy()
+                        dual_data[0].centroid = torch.from_numpy(centroid).float()
                         dual_data[0].scale = scale
                         all_dual_data.append((dual_data, v_idx, select_faces))
                     if obj is not None and not os.path.exists(processed_path):
@@ -153,11 +213,97 @@ class DualDataset(torch_geometric.data.Dataset):
 
     @staticmethod
     def process_one_submesh(noisy_mesh, file_name, original_mesh=None):
-        pass
-    def get(self,):
-        return 1
-    
-    def len(self):
-        return 1
-
+        """
+        Process one submesh and generate graph data for vertex and facet graphs.
         
+        Args:
+            noisy_mesh (Mesh): The noisy mesh object.
+            file_name (str): The file name of the mesh.
+            original_mesh (Mesh, optional): The original mesh object. Defaults to None.
+        
+        Returns:
+            tuple: A tuple containing the graph data for the vertex and facet graphs.
+                - graph_vertex (Data): The graph data for the vertex graph.
+                - graph_face (Data): The graph data for the facet graph.
+        """
+
+        noisy_mesh.update_face_normals()
+        noisy_mesh.update_vertex_normals()
+        
+        ev_indices = torch.from_numpy(noisy_mesh.ev_indices()).long()
+        fv_indices = torch.from_numpy(noisy_mesh.fv_indices()).long()
+        vf_indices = torch.from_numpy(noisy_mesh.vf_indices()).long()
+        
+        edge_dual_fv = data_utils.build_edge_fv(fv_indices)
+        
+        # vertex graph
+        position_v = torch.from_numpy(noisy_mesh.points()).float()
+        normal_v = torch.from_numpy(noisy_mesh.vertex_normals()).float()
+        edge_idx_v = ev_indices.T # directed graph, no self_loops
+        edge_idx_v = to_undirected(edge_idx_v)
+        edge_idx_v,_ = add_self_loops(edge_idx_v)
+
+        edge_weight_v = data_utils.calc_weight(position_v, normal_v, edge_idx_v).float()
+        depth_direction = torch.nn.functional.normalize(position_v, dim=1).float() # Unit vector 
+        graph_vertex = Data(pos=position_v, normal = normal_v, edge_index=edge_idx_v, edge_weight = edge_weight_v,
+                            depth_direction = depth_direction, edge_dual = edge_dual_fv[1])
+        
+        #vertex graph
+        position_f = position_v[fv_indices].mean(1).float()
+        normal_f = torch.from_numpy(noisy_mesh.face_normals()).float()
+        edge_idx_f = data_utils.build_facet_graph(fv_indices, vf_indices) # undirected graph, with self loops
+        edge_weight_f = data_utils.calc_weight(position_f, normal_f, edge_idx_f).float()
+        graph_face = Data(pos=position_f, normal = normal_f, edge_index=edge_idx_f, edge_weight = edge_weight_f,
+                          fv_indices=fv_indices, edge_dual=edge_dual_fv[0])
+        
+        if original_mesh is not None:
+            original_mesh.update_vertex_normals()
+            original_mesh.update_face_normals()
+            # Vertex graph
+            graph_vertex.y = torch.from_numpy(original_mesh.points()).float()
+            # facet graph
+            graph_face.y = torch.from_numpy(original_mesh.face_normals()).float()
+        
+        return (graph_vertex, graph_face)
+    @staticmethod
+    def post_processing(dual_data, is_plot=False):
+        """
+        Post-processes the given dual data.
+
+        Parameters:
+            dual_data (tuple): A tuple containing the vertex and face data.
+            data_type (str): The type of data being processed.
+            is_plot (bool, optional): Whether or not the data is meant for plotting. Defaults to False.
+
+        Returns:
+            tuple: A tuple containing the processed vertex and face data.
+        """
+        data_vertex, data_face = dual_data
+        
+        # Facet graph
+        position_facet_normalized = (data_face.pos - data_vertex.centroid) * data_vertex.scale
+        data_face.x = torch.cat((position_facet_normalized, data_face.normal), 1)
+        data_face.normal = data_face.edge_dual = None
+        
+        # vertex graph
+        position_vertex_normalized = (data_vertex.pos - data_vertex.centroid) * data_vertex.scale
+        data_vertex.x = torch.cat((position_vertex_normalized, data_vertex.normal), 1)
+        data_vertex.y = None if data_vertex.y is None else (data_vertex.y - data_vertex.centroid)*data_vertex.scale
+        data_vertex.normal = data_vertex.centroid = data_vertex.scale = data_vertex.edge_dual = None
+        
+
+
+        if not is_plot:
+            data_vertex.pos = None
+            data_face.pos = None
+        else:
+            data_vertex.pos = data_vertex.y
+            data_vertex.fv_indices = data_face.fv_indices
+            data_vertex.depth_direction = None
+        return data_vertex, data_face
+    def len(self):
+        return len(self.processed_files)
+    def get(self, idx):
+        dual_data = torch.load(self.processed_files[idx])
+        return DualDataset.post_processing(dual_data)
+    
