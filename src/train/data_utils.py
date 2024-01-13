@@ -210,3 +210,32 @@ def compute_face_normal(points, fv_indices):
         N = torch.cross(fv[:, 1] - fv[:, 0], fv[:, 2] - fv[:, 0])
         N = torch.nn.functional.normalize(N, dim=1)
     return N
+
+def update_position2(points, fv_indices, vf_indices, face_normals, n_iter=20, depth_direction=None):
+    """
+    points: Nx3
+    fv_indices: Fx3
+    vf_indices: NxNone
+    face_normals: Fx3
+    """
+    if fv_indices.dtype != torch.long:
+        fv_indices = fv_indices.long()
+    if vf_indices.dtype != torch.long:
+        vf_indices = vf_indices.long()
+
+    v_adj_num = (vf_indices > -1).sum(-1, keepdim=True)
+    v_adj_num = torch.clamp(v_adj_num, min=1)  # for isolated vertex
+    face_normals = torch.cat((face_normals, torch.zeros((1, 3)).to(face_normals.dtype).to(face_normals.device)))
+    adj_face_normals = face_normals[vf_indices]
+
+    for _ in range(n_iter):
+        face_cent = points[fv_indices].mean(1)
+        v_cx = face_cent[vf_indices] - torch.unsqueeze(points, 1)
+        d_per_face = (adj_face_normals*v_cx).sum(-1, keepdim=True)
+        v_per_face = adj_face_normals * d_per_face
+        v_face_mean = v_per_face.sum(1) / v_adj_num
+        if depth_direction is not None:  # for Kinect_v1 Kinect_v2 data
+            v_face_mean = (v_face_mean * depth_direction).sum(1, keepdim=True)
+            v_face_mean = v_face_mean * depth_direction
+        points = points + v_face_mean
+    return points

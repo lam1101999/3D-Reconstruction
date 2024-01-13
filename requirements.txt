@@ -1,0 +1,9 @@
+# use python3.8
+torch
+torch_geometric
+numpy
+matplotlib
+openmesh
+torch-scatter
+torch-cluster
+torch-sparse

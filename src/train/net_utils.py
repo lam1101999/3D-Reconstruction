@@ -1,4 +1,5 @@
 from torch_geometric.utils import remove_self_loops
+from torch_geometric.nn.pool.pool import pool_pos
 from torch_sparse import coalesce
 
 def pool_edge(cluster, edge_index, edge_attr=None, op="mean"):

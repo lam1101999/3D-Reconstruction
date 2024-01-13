@@ -14,6 +14,7 @@ from torch.utils.data import DataLoader
 from utils import Print_Logger
 from dataset import DualDataset, RandomRotate, Collater
 import network
+import loss
 
 
 def parse_argument():
@@ -21,8 +22,10 @@ def parse_argument():
     IS_DEBUG = getattr(sys,"gettrace", None) is not None and sys.gettrace()
     if IS_DEBUG:
         parser.add_argument("--data_type", type=str, default="Research_Data", help="Data type for training [default:Research_Data]")
+        parser.add_argument('--flag', type=str, default="Train", help='Training flag')  
     else:
-        parser.add_argument('--data_type', type=str,required=True, help='Data type for training')    
+        parser.add_argument('--data_type', type=str,required=True, help='Data type for training')  
+        parser.add_argument('--flag', type=str, required=True, help='Training flag')  
     # data processing
     parser.add_argument("--filter_patch_count", type=int, default=100, help="submeshes that facet count less than this will not been included in training")
     parser.add_argument("--sub_size", type=int, default=20000, help="The facet count of submesh if split big mesh[default:20000]")
@@ -40,8 +43,6 @@ def parse_argument():
     # Training
     parser.add_argument("--max_epoch", type=int, default=50, help="The number of epochs[default:50]")
     parser.add_argument("--batch_size", type=int, default=32, help="The batch size[default:32]")
-    parser.add_argument("--restore", type=bool, default=False, help="Whether to restore model[default:False]")
-    parser.add_argument("--model_path", type=str, default=None, help="The path of model[default:None]")
     parser.add_argument('--seed', type=int, default=None,
                         help='Manual seed [default: None]')
     parser.add_argument('--lr_sch', type=str,
@@ -60,6 +61,12 @@ def parse_argument():
                         help='Second decay ratio, for Adam [default: 0.999]')
     parser.add_argument('--weight_decay', type=float,
                         default=0, help='Weight decay coef [default: 0]')
+
+    # Restore
+    parser.add_argument('--restore', type=int, default=0, help='')
+    parser.add_argument('--restore_time', type=str, default=None, help='')
+    parser.add_argument('--last_epoch', type=int, default=None, help='')
+
     opt, ext_list = parser.parse_known_args()
     print(f"-----------------opt----------------\n{opt}")
     print(f"-----------------ext_list----------------\n{ext_list}")
@@ -78,16 +85,20 @@ def parse_argument():
     opt.force_depth = True if opt.data_type in ['Kinect_v1', 'Kinect_v2'] else False
     opt.pool_type = 'max'    
     return opt
+
 def train(opt):
 
     
     # Prepare the training information
     print("\n--------------------Training start------------------------")
     training_name = f"GeoBi-GNN_{opt.data_type}"
-    training_time = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    flag = f"{training_name}_{training_time}"
+    if opt.restore:
+        training_time = opt.restore_time
+    else:
+        training_time = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    flag = f"{training_name}_{opt.flag}"
     print("Training_flag: ", flag)
-    
+
     # Seed
     if opt.seed is None:
         opt.seed = random.randint(1,10000)
@@ -102,15 +113,24 @@ def train(opt):
     # 1. Prepare path
     CODE_DIR = os.path.dirname(os.path.abspath(__file__))
     LOG_DIR = os.path.join(CODE_DIR,"log")
-    log_dir = os.path.join(LOG_DIR, flag)
+    log_dir = os.path.join(LOG_DIR, flag, training_time)
     os.makedirs(log_dir, exist_ok=True)
     sys.stdout = Print_Logger(os.path.join(log_dir, "training_info.txt"))
     opt.model_name = f"{training_name}_model.pth"
     opt.params_name = f"{training_name}_params.pth"
+    opt.restore_name = f"{training_name}_restore.pth"
     model_path = os.path.join(log_dir, opt.model_name)
     params_path = os.path.join(log_dir, opt.params_name)
+    restore_path = os.path.join(log_dir, opt.restore_name)
     torch.save(opt, params_path)
-    print(str(opt))
+
+    # Restore
+    if opt.restore:
+        restore_params = torch.load(restore_path)
+        restore_last_epoch = restore_params.get('last_epoch', None)
+        restore_best_error = restore_params.get('best_error', None)
+    else:
+        restore_params = dict()
 
     # tensorboard
     train_writer = SummaryWriter(os.path.join(log_dir, 'train'))
@@ -131,10 +151,9 @@ def train(opt):
     total_params = sum(p.numel() for p in model.parameters())
     print("Total parameters: ", total_params)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    last_epoch = 0
+    last_epoch = restore_last_epoch + 1 if restore_last_epoch is not None else 0
     if opt.restore:
-        model.load_state_dict(torch.load(opt.model_path))
-        last_epoch = 500
+        model.load_state_dict(torch.load(model_path, map_location=device))
     model = model.to(device)
     if opt.optimizer == 'sgd':
         optimizer = torch.optim.SGD(model.parameters(), lr=opt.lr,
@@ -163,7 +182,7 @@ def train(opt):
         
     # 4. Training
     time_start = datetime.now()
-    best_error = float("inf")
+    best_error = restore_best_error if restore_best_error is not None else float("inf")
 
     for epoch in range(last_epoch, opt.max_epoch):
         print_log = epoch%10==0
@@ -177,11 +196,11 @@ def train(opt):
             data = [d.to(device) for d in data]
             vert_predict, norm_predict,_ = model(data)
             
-            train_loss_v = network.loss_v(vert_predict, data[0].y, opt.loss_v)
-            train_loss_f = network.loss_n(norm_predict, data[1].y, opt.loss_n)
-            train_loss = network.dual_loss(train_loss_v, train_loss_f, v_scale=opt.loss_v_scale, n_scale=opt.loss_n_scale)
-            train_error_v = network.error_v(vert_predict, data[0].y)
-            train_error_f = network.error_n(norm_predict, data[1].y)
+            train_loss_v = loss.loss_v(vert_predict, data[0].y, opt.loss_v)
+            train_loss_f = loss.loss_n(norm_predict, data[1].y, opt.loss_n)
+            train_loss = loss.dual_loss(train_loss_v, train_loss_f, v_scale=opt.loss_v_scale, n_scale=opt.loss_n_scale)
+            train_error_v = loss.error_v(vert_predict, data[0].y)
+            train_error_f = loss.error_n(norm_predict, data[1].y)
             
             # Backward
             train_loss /= opt.batch_size
@@ -219,10 +238,10 @@ def train(opt):
             for i, data in enumerate(eval_dataset):
                 data = [d.to(device) for d in data]
                 vert_p, norm_p, _ = model(data)
-                loss_i_v = network.loss_v(vert_p, data[0].y, opt.loss_v)
-                loss_i_f = network.loss_n(norm_p, data[1].y, opt.loss_n)
-                error_i_v = network.error_v(vert_p, data[0].y)
-                error_i_f = network.error_n(norm_p, data[1].y)
+                loss_i_v = loss.loss_v(vert_p, data[0].y, opt.loss_v)
+                loss_i_f = loss.loss_n(norm_p, data[1].y, opt.loss_n)
+                error_i_v = loss.error_v(vert_p, data[0].y)
+                error_i_f = loss.error_n(norm_p, data[1].y)
 
                 eval_loss_v += loss_i_v * data[0].num_nodes
                 eval_loss_f += loss_i_f * data[1].num_nodes
@@ -264,16 +283,20 @@ def train(opt):
 
     train_writer.close()
     test_writer.close()
-    print(F"\n{opt.flag}\nbest error: {best_error}")
+    print(F"\n{flag}\nbest error: {best_error}")
     print('==='*30)
-
+    print("\n--------------------Training end--------------------------")
     return os.path.join(log_dir, params_path)           
             
 
-    print("\n--------------------Training end--------------------------")
+
 def main():
     opt = parse_argument()
     params_file = train(opt)
+    # params_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),"log", "GeoBi-GNN_Synthetic_2024-01-09-22-11-14", "GeoBi-GNN_Synthetic_params.pth")
+    
+    from test_result import predict_dir
+    predict_dir(params_file, data_dir=None, sub_size=opt.sub_size, gpu=-1)
 
 if __name__ == "__main__":
     main()

@@ -64,7 +64,8 @@ class DualDataset(torch_geometric.data.Dataset):
     def __init__(self, data_type, train_or_test="train",filter_patch_count=0, submesh_size=sys.maxsize, transform=None):
         super().__init__(transform=transform)
         CODE_DIR = os.path.dirname(os.path.abspath(__file__))
-        DATASET_DIR = os.path.join(CODE_DIR,"dataset")
+        BASE_DIR = os.path.dirname(os.path.dirname(CODE_DIR))
+        DATASET_DIR = os.path.join(BASE_DIR,"dataset")
         self.data_type = data_type
         self.root_dir = os.path.join(DATASET_DIR, data_type)
         self.data_dir = os.path.join(DATASET_DIR, data_type, train_or_test)
@@ -81,6 +82,7 @@ class DualDataset(torch_geometric.data.Dataset):
         self.original_files, self.noisy_files = self.__get_original_and_noisy_data_list(original_dir, noisy_dir)
         
         # 2. Process Data
+        self.processed_information_file_path = os.path.join(self.processed_dir, "processed_information.pt")
         self.process_data()
     @property
     def processed_dir(self):
@@ -120,16 +122,22 @@ class DualDataset(torch_geometric.data.Dataset):
         Returns:
             None
         """
-        print("Processing...")
+
         os.makedirs(self.processed_dir, exist_ok=True)
-        bar_format = "{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}] {postfix}"
-        pbar = tqdm(total=len(self.noisy_files), ncols=85, desc="Processing Data", bar_format=bar_format)
-        for i, (original_file, noisy_file) in enumerate(zip(self.original_files, self.noisy_files)):
-            pbar.postfix = os.path.basename(original_file)[:-4]
-            pbar.update(1)
-            self.process_one_data(noisy_file, self.submesh_size,original_file=original_file, obj=self)
-        pbar.close()
-        print("Done!")
+        if os.path.exists(self.processed_information_file_path): # load processed information if exist
+            self.processed_files = torch.load(self.processed_information_file_path)
+            print("Load processed information!")
+        else:
+            print("Processing...")
+            bar_format = "{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}] {postfix}"
+            pbar = tqdm(total=len(self.noisy_files), ncols=85, desc="Processing Data", bar_format=bar_format)
+            for i, (original_file, noisy_file) in enumerate(zip(self.original_files, self.noisy_files)):
+                pbar.postfix = os.path.basename(original_file)[:-4]
+                pbar.update(1)
+                self.process_one_data(noisy_file, self.submesh_size,original_file=original_file, obj=self)
+            torch.save(self.processed_files, self.processed_information_file_path)
+            pbar.close()
+            print("Done!")
     
     @staticmethod
     def process_one_data(noisy_file, submesh_size, original_file=None, obj=None):
