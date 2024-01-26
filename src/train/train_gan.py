@@ -86,6 +86,121 @@ def parse_argument():
     opt.pool_type = 'max'    
     return opt
 
+def choose_optimizer(model, opt):
+    if opt.optimizer == 'sgd':
+        optimizer = torch.optim.SGD(model.parameters(), lr=opt.lr,
+                              momentum=opt.momentum, weight_decay=opt.weight_decay)
+    elif opt.optimizer == 'rmsprop':
+        optimizer = torch.optim.RMSprop(model.parameters(), lr=opt.lr, alpha=0.9)
+    elif opt.optimizer == 'adam':
+        optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr, betas=(
+            opt.beta1, opt.beta2), weight_decay=opt.weight_decay)
+    return optimizer
+
+def choose_learningrate_schedule(optimizer, opt):
+    if opt.lr_sch == 'step':
+        lr_sch = lr_scheduler.StepLR(
+            optimizer, step_size=opt.lr_step[0], gamma=opt.lr_decay)
+    elif opt.lr_sch == 'multi_step':
+        lr_sch = lr_scheduler.MultiStepLR(
+            optimizer, milestones=opt.lr_step, gamma=opt.lr_decay)
+    elif opt.lr_sch == 'exp':
+        lr_sch = lr_scheduler.ExponentialLR(optimizer, gamma=opt.lr_decay)
+    elif opt.lr_sch == 'auto':
+        lr_sch = lr_scheduler.ReduceLROnPlateau(
+            optimizer, factor=opt.lr_decay, patience=opt.lr_step[0], verbose=True)
+    else:
+        def lmd_lr(step):
+            return opt.lr_decay**(step/opt.lr_step[0])
+        lr_sch = lr_scheduler.LambdaLR(optimizer, lr_lambda=lmd_lr)
+    return lr_sch
+
+def train_one_epoch(model, train_dataset_loader, optimizer, device, epoch, opt, train_writer):
+    # Set up pbar
+    desc ="Training - epoch: {:>3} loss {:.4f} {:.4f} {:.4f} error {:.4f} {:.4f}" #format for tqdm from internet
+    bar = "{desc} ({n_fmt}/{total_fmt} | {elapsed} < {remaining})"
+    pbar = tqdm(total=len(train_dataset_loader), ncols=90, leave=False, desc=desc.format(epoch, 0, 0, 0, 0, 0),bar_format=bar)
+    
+    # Turn on training mode
+    model.train()
+    optimizer.zero_grad()    
+
+    # Loop through data
+    for step, data in enumerate(train_dataset_loader):
+        data = [d.to(device) for d in data]
+
+        # Forward
+        vert_predict, norm_predict, _ = model(data)
+
+        # Calculate Loss
+        train_loss_v = loss.loss_v(vert_predict, data[0].y, opt.loss_v)
+        train_loss_f = loss.loss_n(norm_predict, data[1].y, opt.loss_n)
+        train_loss = loss.dual_loss(
+                train_loss_v, train_loss_f, v_scale=opt.loss_v_scale, n_scale=opt.loss_n_scale)
+        train_error_v = loss.error_v(vert_predict, data[0].y)
+        train_error_f = loss.error_n(norm_predict, data[1].y)
+
+        # Backward
+        train_loss /= opt.batch_size
+        train_loss.backward()
+        train_loss *= opt.batch_size
+
+        # Gradient accumulation, update when batch_size reached
+        if (((step+1) % opt.batch_size) == 0) or (step+1 == len(train_dataset_loader)):
+            optimizer.step()
+            optimizer.zero_grad()
+            pbar.desc = desc.format(
+                    epoch, train_loss_v, train_loss_f, train_loss, train_error_v, train_error_f)
+            pbar.update(opt.batch_size)
+
+    train_writer.add_scalar(
+                    'loss_v', train_loss_v.item(), epoch)
+    train_writer.add_scalar(
+                    'loss_f', train_loss_f.item(), epoch)
+    train_writer.add_scalar(
+                    'dual_loss', train_loss.item(), epoch)
+    train_writer.add_scalar(
+                    'error_v', train_error_v.item(), epoch)
+    train_writer.add_scalar(
+                    'error_f', train_error_f.item(), epoch)
+    pbar.close()
+
+def eval_model(model, eval_dataset_loader, device, epoch, opt, test_writer):
+    model.eval()
+    with torch.no_grad():
+        bar = "{desc} ({n_fmt}/{total_fmt} | {elapsed} < {remaining})"
+        desc = "VALIDATION - epoch:{:>3} loss:{:.4f} {:.4f}  error:{:.4f} {:.4f}"
+        pbar = tqdm(total=len(eval_dataset_loader), ncols=90, leave=False,
+                        desc=desc.format(epoch, 0, 0, 0, 0), bar_format=bar)
+        eval_loss_v = eval_loss_f = eval_error_v = eval_error_f = count_v = count_f = 0
+        for i, data in enumerate(eval_dataset_loader):
+            data = [d.to(device) for d in data]
+            vert_p, norm_p, _ = model(data)
+            loss_i_v = loss.loss_v(vert_p, data[0].y, opt.loss_v)
+            loss_i_f = loss.loss_n(norm_p, data[1].y, opt.loss_n)
+            error_i_v = loss.error_v(vert_p, data[0].y)
+            error_i_f = loss.error_n(norm_p, data[1].y)
+
+            eval_loss_v += loss_i_v * data[0].num_nodes
+            eval_loss_f += loss_i_f * data[1].num_nodes
+            eval_error_v += error_i_v * data[0].num_nodes
+            eval_error_f += error_i_f * data[1].num_nodes
+            count_v += data[0].num_nodes
+            count_f += data[1].num_nodes
+
+            pbar.desc = desc.format(
+                    epoch, loss_i_v, loss_i_f, error_i_v, error_i_f)
+            pbar.update(1)
+        pbar.close()
+        eval_loss_v /= count_v
+        eval_loss_f /= count_f
+        eval_error_v /= count_v
+        eval_error_f /= count_f
+        test_writer.add_scalar('loss_v', eval_loss_v.item(), epoch)
+        test_writer.add_scalar('loss_f', eval_loss_f.item(), epoch)
+        test_writer.add_scalar('error_v', eval_error_v.item(), epoch)
+        test_writer.add_scalar('error_f', eval_error_f.item(), epoch)
+    return eval_loss_v, eval_loss_f, eval_error_v, eval_error_f
 def train(opt):
 
     
@@ -140,7 +255,7 @@ def train(opt):
     print("==="*30)
     train_dataset = DualDataset(opt.data_type, train_or_test="train", filter_patch_count=opt.filter_patch_count, submesh_size=opt.sub_size, transform = RandomRotate(False))
     train_dataset_loader = DataLoader(train_dataset, shuffle=True, collate_fn=Collater([]))
-    eval_dataset = DualDataset(opt.data_type, 'test', submesh_size=opt.sub_size)
+    eval_dataset = DualDataset(opt.data_type, train_or_test='test', submesh_size=opt.sub_size)
     print(f"train_dataset:{len(train_dataset):>4} samples")
     print(f"Testing set:{len(eval_dataset):>4} samples")
     
@@ -158,122 +273,27 @@ def train(opt):
         last_epoch = 0
     print(device)
     model = model.to(device)
-    if opt.optimizer == 'sgd':
-        optimizer = torch.optim.SGD(model.parameters(), lr=opt.lr,
-                              momentum=opt.momentum, weight_decay=opt.weight_decay)
-    elif opt.optimizer == 'rmsprop':
-        optimizer = torch.optim.RMSprop(model.parameters(), lr=opt.lr, alpha=0.9)
-    elif opt.optimizer == 'adam':
-        optimizer = torch.optim.Adam(model.parameters(), lr=opt.lr, betas=(
-            opt.beta1, opt.beta2), weight_decay=opt.weight_decay)
+    optimizer = choose_optimizer(model, opt)
+    lr_sch = choose_learningrate_schedule(optimizer, opt)
 
-    if opt.lr_sch == 'step':
-        lr_sch = lr_scheduler.StepLR(
-            optimizer, step_size=opt.lr_step[0], gamma=opt.lr_decay)
-    elif opt.lr_sch == 'multi_step':
-        lr_sch = lr_scheduler.MultiStepLR(
-            optimizer, milestones=opt.lr_step, gamma=opt.lr_decay)
-    elif opt.lr_sch == 'exp':
-        lr_sch = lr_scheduler.ExponentialLR(optimizer, gamma=opt.lr_decay)
-    elif opt.lr_sch == 'auto':
-        lr_sch = lr_scheduler.ReduceLROnPlateau(
-            optimizer, factor=opt.lr_decay, patience=opt.lr_step[0], verbose=True)
-    else:
-        def lmd_lr(step):
-            return opt.lr_decay**(step/opt.lr_step[0])
-        lr_sch = lr_scheduler.LambdaLR(optimizer, lr_lambda=lmd_lr)
         
     # 4. Training
     time_start = datetime.now()
 
     for epoch in range(last_epoch, opt.max_epoch):
+
         print_log = epoch%10==0
-        model.train()
-        desc ="Training - epoch: {:>3} loss {:.4f} {:.4f} {:.4f} error {:.4f} {:.4f}" #format for tqdm from internet
-        bar = "{desc} ({n_fmt}/{total_fmt} | {elapsed} < {remaining})"
-        pbar = tqdm(total=len(train_dataset_loader), ncols=90, leave=False, desc=desc.format(epoch, 0, 0, 0, 0, 0), bar_format=bar)
-        optimizer.zero_grad()
-        for step, data in enumerate(train_dataset_loader):
-            iteration = len(train_dataset_loader)*(epoch) + step
-            data = [d.to(device) for d in data]
-            vert_predict, norm_predict,_ = model(data)
-            
-            train_loss_v = loss.loss_v(vert_predict, data[0].y, opt.loss_v)
-            train_loss_f = loss.loss_n(norm_predict, data[1].y, opt.loss_n)
-            train_loss = loss.dual_loss(train_loss_v, train_loss_f, v_scale=opt.loss_v_scale, n_scale=opt.loss_n_scale)
-            train_error_v = loss.error_v(vert_predict, data[0].y)
-            train_error_f = loss.error_n(norm_predict, data[1].y)
-            
-            # Backward
-            train_loss /= opt.batch_size
-            train_loss.backward()
-            train_loss *= opt.batch_size
-            
-            # Gradient accumulation, update when batch_size reached
-            if (((step+1) % opt.batch_size) == 0) or (step+1 == len(train_dataset_loader)):
-                optimizer.step()
-                optimizer.zero_grad()
-                last_lr = optimizer.param_groups[0]['lr']
-                train_writer.add_scalar(
-                    'loss_v', train_loss_v.item(), iteration)
-                train_writer.add_scalar(
-                    'loss_f', train_loss_f.item(), iteration)
-                train_writer.add_scalar(
-                    'dual_loss', train_loss.item(), iteration)
-                train_writer.add_scalar(
-                    'error_v', train_error_v.item(), iteration)
-                train_writer.add_scalar(
-                    'error_f', train_error_f.item(), iteration)
+        train_one_epoch(model, train_dataset_loader, optimizer, device, epoch, opt, train_writer)
+        eval_loss_v, eval_loss_f, eval_error_v, eval_error_f = eval_model(model, eval_dataset, device, epoch, opt, test_writer)
+        lr_sch.step()
 
-                pbar.desc = desc.format(
-                    epoch, train_loss_v, train_loss_f, train_loss, train_error_v, train_error_f)
-                pbar.update(opt.batch_size)    
-        pbar.close()
-        
-        # prediction
-        model.eval()
-        with torch.no_grad():
-            desc = "VALIDATION - epoch:{:>3} loss:{:.4f} {:.4f}  error:{:.4f} {:.4f}"
-            pbar = tqdm(total=len(eval_dataset), ncols=90, leave=False,
-                        desc=desc.format(epoch, 0, 0, 0, 0), bar_format=bar)
-            eval_loss_v = eval_loss_f = eval_error_v = eval_error_f = count_v = count_f = 0
-            for i, data in enumerate(eval_dataset):
-                data = [d.to(device) for d in data]
-                vert_p, norm_p, _ = model(data)
-                loss_i_v = loss.loss_v(vert_p, data[0].y, opt.loss_v)
-                loss_i_f = loss.loss_n(norm_p, data[1].y, opt.loss_n)
-                error_i_v = loss.error_v(vert_p, data[0].y)
-                error_i_f = loss.error_n(norm_p, data[1].y)
-
-                eval_loss_v += loss_i_v * data[0].num_nodes
-                eval_loss_f += loss_i_f * data[1].num_nodes
-                eval_error_v += error_i_v * data[0].num_nodes
-                eval_error_f += error_i_f * data[1].num_nodes
-                count_v += data[0].num_nodes
-                count_f += data[1].num_nodes
-
-                pbar.desc = desc.format(
-                    epoch, loss_i_v, loss_i_f, error_i_v, error_i_f)
-                pbar.update(1)
-            pbar.close()
-            eval_loss_v /= count_v
-            eval_loss_f /= count_f
-            eval_error_v /= count_v
-            eval_error_f /= count_f
-            test_writer.add_scalar('loss_v', eval_loss_v.item(), iteration)
-            test_writer.add_scalar('loss_f', eval_loss_f.item(), iteration)
-            test_writer.add_scalar('error_v', eval_error_v.item(), iteration)
-            test_writer.add_scalar('error_f', eval_error_f.item(), iteration)
-
-        if opt.lr_sch == 'auto':
-            lr_sch.step(eval_error_f)
-        else:
-            lr_sch.step()
-
+        # Log info
+        last_lr = optimizer.param_groups[0]['lr']
         span = datetime.now() - time_start
         str_log = F"Epoch {epoch:>3}: {str(span).split('.')[0]:>8}  loss:{eval_loss_v:.4f} {eval_loss_f:.4f} | "
         str_log += F"error:{eval_error_v:.4f} {eval_error_f:.4f}  lr:{last_lr:.4e}"
-        # save model per epoch
+
+        # save better model
         if eval_error_f < best_error:
             best_error = eval_error_f
             torch.save(model.state_dict(), model_path)

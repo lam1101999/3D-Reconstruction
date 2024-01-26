@@ -89,7 +89,12 @@ class GNNModule(torch.nn.Module):
         data_r1.x = torch.cat((data_r1.x, feat_r1_r), 1) # [N, 64]
         feat_r1_r = torch.nn.functional.leaky_relu(self.r_conv4(data_r1.x, data_r1.edge_index), 0.2, inplace=True) # [N, 32]
         return feat_r1_r
-        
+
+class Discriminator(torch.nn.Module):
+    def __init__(self):
+        pass
+    def forward(self, data):
+        pass   
         
 class PoolingLayer(torch.nn.Module):
     def __init__(self, in_channel, pool_type='max', pool_step=2, edge_weight_type=0, wei_param=2):

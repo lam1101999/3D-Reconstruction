@@ -126,6 +126,7 @@ class DualDataset(torch_geometric.data.Dataset):
         os.makedirs(self.processed_dir, exist_ok=True)
         if os.path.exists(self.processed_information_file_path): # load processed information if exist
             self.processed_files = torch.load(self.processed_information_file_path)
+            self.processed_files.sort()
             print("Load processed information!")
         else:
             print("Processing...")
@@ -164,7 +165,7 @@ class DualDataset(torch_geometric.data.Dataset):
         original_points = None if original_mesh is None else original_mesh.points().astype(np.float32)
         
         # 2. center and scale, record
-        _, centroid, scale = data_utils.center_and_scale(noisy_points, noisy_mesh.ev_indices(), 1)
+        _, centroid, scale = data_utils.center_and_scale(noisy_points, noisy_mesh.ev_indices(), 0)
         
         # 3. split to submesh
         all_dual_data = []
