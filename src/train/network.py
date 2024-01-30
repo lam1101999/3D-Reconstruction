@@ -91,10 +91,31 @@ class GNNModule(torch.nn.Module):
         return feat_r1_r
 
 class Discriminator(torch.nn.Module):
-    def __init__(self):
-        pass
-    def forward(self, data):
-        pass   
+        
+    def __init__(self, num_features, hidden_dim, out_channels):
+        self.num_features = num_features
+        self.hidden_dim = hidden_dim
+        self.num_classes = num_classes
+
+        self.conv1 = GCNConv(num_features, hidden_dim)
+        self.conv2 = GCNConv(hidden_dim, hidden_dim)
+        self.conv3 = GCNConv(hidden_dim, hidden_dim)
+        self.pool = global_mean_pool
+        self.fc1 = nn.Linear(hidden_dim, hidden_dim)
+        self.fc2 = nn.Linear(hidden_dim, num_classes)
+
+    def forward(self, x, edge_index):
+        x = self.conv1(x, edge_index)
+        x = x.relu()
+        x = self.conv2(x, edge_index)
+        x = x.relu()
+        x = self.conv3(x, edge_index)
+        x = self.pool(x, torch.zeros(x.size(0), dtype=torch.long))
+        x = x.relu()
+        x = self.fc1(x)
+        x = x.relu()
+        x = self.fc2(x)
+        return x
         
 class PoolingLayer(torch.nn.Module):
     def __init__(self, in_channel, pool_type='max', pool_step=2, edge_weight_type=0, wei_param=2):

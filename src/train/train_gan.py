@@ -285,7 +285,10 @@ def train(opt):
         print_log = epoch%10==0
         train_one_epoch(model, train_dataset_loader, optimizer, device, epoch, opt, train_writer)
         eval_loss_v, eval_loss_f, eval_error_v, eval_error_f = eval_model(model, eval_dataset, device, epoch, opt, test_writer)
-        lr_sch.step()
+        if opt.lr_sch == 'auto':
+            lr_sch.step(eval_error_f)
+        else:
+            lr_sch.step()
 
         # Log info
         last_lr = optimizer.param_groups[0]['lr']
