@@ -115,42 +115,74 @@ def choose_learningrate_schedule(optimizer, opt):
         lr_sch = lr_scheduler.LambdaLR(optimizer, lr_lambda=lmd_lr)
     return lr_sch
 
-def train_one_epoch(model, train_dataset_loader, optimizer, device, epoch, opt, train_writer):
+def train_one_epoch(generator, discriminator, train_dataset_loader, optimizer_generator, optimizer_discriminator, device, epoch, opt, train_writer):
     # Set up pbar
     desc ="Training - epoch: {:>3} loss {:.4f} {:.4f} {:.4f} error {:.4f} {:.4f}" #format for tqdm from internet
     bar = "{desc} ({n_fmt}/{total_fmt} | {elapsed} < {remaining})"
     pbar = tqdm(total=len(train_dataset_loader), ncols=90, leave=False, desc=desc.format(epoch, 0, 0, 0, 0, 0),bar_format=bar)
     
     # Turn on training mode
-    model.train()
-    optimizer.zero_grad()    
+    generator.train()
+    discriminator.train()
+    optimizer_generator.zero_grad()    
+    optimizer_discriminator.zero_grad()
 
     # Loop through data
     for step, data in enumerate(train_dataset_loader):
         data = [d.to(device) for d in data]
 
-        # Forward
-        vert_predict, norm_predict, _ = model(data)
+        # ==================================
+        #  Discriminator 
+        # ==================================
+        optimizer_discriminator.zero_grad()
 
-        # Calculate Loss
+        # Generate fake data
+        vert_predict, norm_predict, _ = generator(data)
+        vert_predict, norm_predict = vert_predict.detach(), norm_predict.detach()
+        # Calculate loss
+        real_vertex_logits, real_facet_logits = discriminator(data[0].y, data[1].y, data[0].edge_index, data[1].edge_index)
+        fake_vertex_logits, fake_facet_logits = discriminator(vert_predict, norm_predict, data[0].edge_index, data[1].edge_index)
+        discriminator_loss = loss.discriminator_loss(real_vertex_logits, real_facet_logits, fake_vertex_logits, fake_facet_logits, device)
+
+        # Calculate gradient discriminator
+        discriminator_loss /= opt.batch_size
+        discriminator_loss.backward()
+        discriminator_loss *= opt.batch_size
+
+        # ==================================
+        # Generator
+        # ==================================
+        optimizer_generator.zero_grad()
+        # Generate fake data
+        vert_predict, norm_predict, _ = generator(data)
+
+        # Calculate generator Loss
+        fake_vertex_logits, fake_facet_logits = discriminator(vert_predict, norm_predict, data[0].edge_index, data[1].edge_index)
+        fake_vertex_logits, fake_facet_logits = fake_vertex_logits.detach(), fake_facet_logits.detach()    
+        generator_loss = loss.generator_loss(fake_vertex_logits, fake_facet_logits, device)
+
+        # Calculate dual loss
+        # ==================================
         train_loss_v = loss.loss_v(vert_predict, data[0].y, opt.loss_v)
         train_loss_f = loss.loss_n(norm_predict, data[1].y, opt.loss_n)
-        train_loss = loss.dual_loss(
+        dual_loss = loss.dual_loss(
                 train_loss_v, train_loss_f, v_scale=opt.loss_v_scale, n_scale=opt.loss_n_scale)
+        # Calculate gradient generator
+        total_generator_loss = generator_loss + dual_loss
+        total_generator_loss /= opt.batch_size
+        total_generator_loss.backward()
+        total_generator_loss *= opt.batch_size
+        # Calculate error
         train_error_v = loss.error_v(vert_predict, data[0].y)
         train_error_f = loss.error_n(norm_predict, data[1].y)
-
-        # Backward
-        train_loss /= opt.batch_size
-        train_loss.backward()
-        train_loss *= opt.batch_size
-
         # Gradient accumulation, update when batch_size reached
         if (((step+1) % opt.batch_size) == 0) or (step+1 == len(train_dataset_loader)):
-            optimizer.step()
-            optimizer.zero_grad()
+            optimizer_discriminator.step()
+            optimizer_generator.step()
+            optimizer_discriminator.zero_grad()
+            optimizer_generator.zero_grad()
             pbar.desc = desc.format(
-                    epoch, train_loss_v, train_loss_f, train_loss, train_error_v, train_error_f)
+                    epoch, train_loss_v, train_loss_f, dual_loss, train_error_v, train_error_f)
             pbar.update(opt.batch_size)
 
     train_writer.add_scalar(
@@ -158,7 +190,7 @@ def train_one_epoch(model, train_dataset_loader, optimizer, device, epoch, opt, 
     train_writer.add_scalar(
                     'loss_f', train_loss_f.item(), epoch)
     train_writer.add_scalar(
-                    'dual_loss', train_loss.item(), epoch)
+                    'dual_loss', dual_loss.item(), epoch)
     train_writer.add_scalar(
                     'error_v', train_error_v.item(), epoch)
     train_writer.add_scalar(
@@ -260,22 +292,29 @@ def train(opt):
     print(f"Testing set:{len(eval_dataset):>4} samples")
     
     # 3. Prepare Model
-    model = network.DualGNN(force_depth=opt.force_depth, pool_type=opt.pool_type, wei_param=opt.wei_param)
-    total_params = sum(p.numel() for p in model.parameters())
-    print("Total parameters: ", total_params)
+    generator = network.DualGenerator(force_depth=opt.force_depth, pool_type=opt.pool_type, wei_param=opt.wei_param)
+    discriminator = network.DualDiscriminator(opt.force_depth, pool_type=opt.pool_type, wei_param=opt.wei_param)
+    total_params_generator = sum(p.numel() for p in generator.parameters())
+    total_params_discriminator = sum(p.numel() for p in discriminator.parameters())
+    print("Total parameters generator: ", total_params_generator)
+    print("Total parameters discriminator: ", total_params_discriminator)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     if opt.restore:
         last_epoch = restore_last_epoch + 1
         best_error = restore_best_error
-        model.load_state_dict(torch.load(model_path, map_location=device))
+        generator.load_state_dict(restore_params.get("generator"))
+        discriminator.load_state_dict(restore_params.get("discriminator"))
     else:
         best_error = float("inf")
         last_epoch = 0
     print(device)
-    model = model.to(device)
-    optimizer = choose_optimizer(model, opt)
-    lr_sch = choose_learningrate_schedule(optimizer, opt)
+    generator = generator.to(device)
+    discriminator = discriminator.to(device)
+    optimizer_generator = choose_optimizer(generator, opt)
+    optimizer_discriminator = choose_optimizer(discriminator, opt)
 
+    lr_sch_optimizer = choose_learningrate_schedule(optimizer_generator, opt)
+    lr_sch_discriminator = choose_learningrate_schedule(optimizer_discriminator, opt) 
         
     # 4. Training
     time_start = datetime.now()
@@ -283,28 +322,33 @@ def train(opt):
     for epoch in range(last_epoch, opt.max_epoch):
 
         print_log = epoch%10==0
-        train_one_epoch(model, train_dataset_loader, optimizer, device, epoch, opt, train_writer)
-        eval_loss_v, eval_loss_f, eval_error_v, eval_error_f = eval_model(model, eval_dataset, device, epoch, opt, test_writer)
+        train_one_epoch(generator, discriminator, train_dataset_loader, optimizer_generator, optimizer_discriminator, device, epoch, opt, train_writer)
+        eval_loss_v, eval_loss_f, eval_error_v, eval_error_f = eval_model(generator, eval_dataset, device, epoch, opt, test_writer)
         if opt.lr_sch == 'auto':
-            lr_sch.step(eval_error_f)
+            lr_sch_optimizer.step(eval_error_f)
+            lr_sch_discriminator.step(eval_error_f)
         else:
-            lr_sch.step()
+            lr_sch_optimizer.step()
+            lr_sch_discriminator.step()
 
         # Log info
-        last_lr = optimizer.param_groups[0]['lr']
+        last_lr = optimizer_generator.param_groups[0]['lr']
         span = datetime.now() - time_start
         str_log = F"Epoch {epoch:>3}: {str(span).split('.')[0]:>8}  loss:{eval_loss_v:.4f} {eval_loss_f:.4f} | "
         str_log += F"error:{eval_error_v:.4f} {eval_error_f:.4f}  lr:{last_lr:.4e}"
 
         # save better model
         if eval_error_f < best_error:
+            # Save model
             best_error = eval_error_f
-            torch.save(model.state_dict(), model_path)
+            torch.save(generator.state_dict(), model_path)
             str_log = str_log + " - save model"
             print_log = True
-            #save info
+            # save info
             restore_params["last_epoch"] = epoch
             restore_params["best_error"] = best_error
+            restore_params["generator"] = generator.state_dict()
+            restore_params["discriminator"] = discriminator.state_dict()
             torch.save(restore_params, restore_path)
 
         if print_log:

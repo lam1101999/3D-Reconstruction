@@ -13,7 +13,7 @@ except ImportError:
     icp = None
 import data_utils
 import net_utils
-class DualGNN(torch.nn.Module):
+class DualGenerator(torch.nn.Module):
     def __init__(self, force_depth=False, pool_type="max", edge_weight_type=10, wei_param=2):
         super().__init__()
         self.force_depth = force_depth
@@ -30,6 +30,7 @@ class DualGNN(torch.nn.Module):
         
     def forward(self, dual_data):
         data_vertex, data_face = dual_data
+        data_vertex, data_face = data_vertex.clone(), data_face.clone()
         xyz = data_vertex.x[:,:3]
         nf = data_face.x[:,3:6]
         
@@ -90,33 +91,54 @@ class GNNModule(torch.nn.Module):
         feat_r1_r = torch.nn.functional.leaky_relu(self.r_conv4(data_r1.x, data_r1.edge_index), 0.2, inplace=True) # [N, 32]
         return feat_r1_r
 
-class Discriminator(torch.nn.Module):
+class DualDiscriminator(torch.nn.Module):
         
-    def __init__(self, num_features, hidden_dim, out_channels):
-        self.num_features = num_features
-        self.hidden_dim = hidden_dim
-        self.num_classes = num_classes
+    def __init__(self, force_depth=False, pool_type="max", edge_weight_type=10, wei_param=2):
+        super().__init__()
+        self.force_depth = force_depth
+        
+        # vertex graph
+        self.discriminator_v = DiscriminatorModule(3, 32, pool_type, 2, edge_weight_type, wei_param) #outchanneels = 32
+        self.fc_v1 = torch.nn.Linear(16, 1024)
+        self.fc_v2 = torch.nn.Linear(1024, 1) if self.force_depth else torch.nn.Linear(1024, 3)
+        
+        # facet graph
+        self.discriminator_f = DiscriminatorModule(3, 32, pool_type, 2, edge_weight_type, wei_param) #outchanneels = 32
+        self.fc_f1 = torch.nn.Linear(16, 1024)
+        self.fc_f2 = torch.nn.Linear(1024,3)
 
-        self.conv1 = GCNConv(num_features, hidden_dim)
-        self.conv2 = GCNConv(hidden_dim, hidden_dim)
-        self.conv3 = GCNConv(hidden_dim, hidden_dim)
-        self.pool = global_mean_pool
-        self.fc1 = nn.Linear(hidden_dim, hidden_dim)
-        self.fc2 = nn.Linear(hidden_dim, num_classes)
+    def forward(self, vertex_graph, facet_graph, edge_index_v, edge_index_f):
+        # vertex graph
+        vertex_graph = self.discriminator_v(vertex_graph, edge_index_v)
+        vertex_graph = torch.nn.functional.leaky_relu(self.fc_v1(vertex_graph), 0.2, inplace=True)
+        vertex_graph = self.fc_v2(vertex_graph)
 
-    def forward(self, x, edge_index):
-        x = self.conv1(x, edge_index)
-        x = x.relu()
-        x = self.conv2(x, edge_index)
-        x = x.relu()
-        x = self.conv3(x, edge_index)
-        x = self.pool(x, torch.zeros(x.size(0), dtype=torch.long))
-        x = x.relu()
-        x = self.fc1(x)
-        x = x.relu()
-        x = self.fc2(x)
+        # facet graph
+        facet_graph = self.discriminator_f(facet_graph, edge_index_f)
+        facet_graph = torch.nn.functional.leaky_relu(self.fc_f1(facet_graph), 0.2, inplace=True)
+        facet_graph = self.fc_f2(facet_graph)
+
+        return vertex_graph, facet_graph
+
+class DiscriminatorModule(torch.nn.Module):
+
+    def __init__(self, in_channels=3, out_channels=16, pool_type="max", pool_step=2, edge_weight_type=0, wei_param=2):
+        super().__init__()
+        
+        self.e_conv1 = FeaStConv(in_channels, 16, 9)
+        self.e_conv2 = FeaStConv(16, 32, 9)
+        self.e_conv3 = FeaStConv(32, 64, 9)
+
+        self.d_conv1 = FeaStConv(64, 32, 9)
+        self.d_conv2 = FeaStConv(32, 16, 9)    
+    def forward(self, x, edge_index, plot_pool=False):
+        x = torch.nn.functional.leaky_relu(self.e_conv1(x, edge_index), 0.2, inplace=True) # [N, 16]
+        x = torch.nn.functional.leaky_relu(self.e_conv2(x, edge_index), 0.2, inplace=True) # [N, 32]
+        x = torch.nn.functional.leaky_relu(self.e_conv3(x, edge_index), 0.2, inplace=True) # [N, 64]
+        x = torch.nn.functional.leaky_relu(self.d_conv1(x, edge_index), 0.2, inplace=True) # [N, 32]
+        x = torch.nn.functional.leaky_relu(self.d_conv2(x, edge_index), 0.2, inplace=True) # [N, 16] 
+        
         return x
-        
 class PoolingLayer(torch.nn.Module):
     def __init__(self, in_channel, pool_type='max', pool_step=2, edge_weight_type=0, wei_param=2):
         super(PoolingLayer, self).__init__()

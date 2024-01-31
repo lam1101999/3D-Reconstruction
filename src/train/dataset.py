@@ -257,13 +257,12 @@ class DualDataset(torch_geometric.data.Dataset):
         graph_vertex = Data(pos=position_v, normal = normal_v, edge_index=edge_idx_v, edge_weight = edge_weight_v,
                             depth_direction = depth_direction, edge_dual = edge_dual_fv[1])
         
-        #vertex graph
+        # face graph
         position_f = position_v[fv_indices].mean(1).float()
         normal_f = torch.from_numpy(noisy_mesh.face_normals()).float()
         edge_idx_f = data_utils.build_facet_graph(fv_indices, vf_indices) # undirected graph, with self loops
         edge_weight_f = data_utils.calc_weight(position_f, normal_f, edge_idx_f).float()
-        graph_face = Data(pos=position_f, normal = normal_f, edge_index=edge_idx_f, edge_weight = edge_weight_f,
-                          fv_indices=fv_indices, edge_dual=edge_dual_fv[0])
+        graph_face = Data(pos=position_f, normal = normal_f, edge_index=edge_idx_f, edge_weight = edge_weight_f, fv_indices=fv_indices, edge_dual=edge_dual_fv[0])
         
         if original_mesh is not None:
             original_mesh.update_vertex_normals()
