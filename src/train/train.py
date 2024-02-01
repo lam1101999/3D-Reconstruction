@@ -145,7 +145,7 @@ def train(opt):
     print(f"Testing set:{len(eval_dataset):>4} samples")
     
     # 3. Prepare Model
-    model = network.DualGNN(force_depth=opt.force_depth, pool_type=opt.pool_type, wei_param=opt.wei_param)
+    model = network.DualGenerator(force_depth=opt.force_depth, pool_type=opt.pool_type, wei_param=opt.wei_param)
     total_params = sum(p.numel() for p in model.parameters())
     print("Total parameters: ", total_params)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

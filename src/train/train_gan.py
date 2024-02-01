@@ -184,35 +184,39 @@ def train_one_epoch(generator, discriminator, train_dataset_loader, optimizer_ge
             pbar.desc = desc.format(
                     epoch, train_loss_v, train_loss_f, dual_loss, train_error_v, train_error_f)
             pbar.update(opt.batch_size)
-
-    train_writer.add_scalar(
-                    'loss_v', train_loss_v.item(), epoch)
-    train_writer.add_scalar(
-                    'loss_f', train_loss_f.item(), epoch)
-    train_writer.add_scalar(
-                    'dual_loss', dual_loss.item(), epoch)
-    train_writer.add_scalar(
-                    'error_v', train_error_v.item(), epoch)
-    train_writer.add_scalar(
-                    'error_f', train_error_f.item(), epoch)
+    train_writer.add_scalar("discriminator_loss", discriminator_loss.item(), epoch)
+    train_writer.add_scalar("generator_loss", generator_loss.item(), epoch)
+    train_writer.add_scalar('loss_v', train_loss_v.item(), epoch)
+    train_writer.add_scalar('loss_f', train_loss_f.item(), epoch)
+    train_writer.add_scalar('dual_loss', dual_loss.item(), epoch)
+    train_writer.add_scalar('error_v', train_error_v.item(), epoch)
+    train_writer.add_scalar('error_f', train_error_f.item(), epoch)
     pbar.close()
 
-def eval_model(model, eval_dataset_loader, device, epoch, opt, test_writer):
-    model.eval()
+def eval_model(generator, discriminator, eval_dataset_loader, device, epoch, opt, test_writer):
+    generator.eval()
+    discriminator.eval()
     with torch.no_grad():
         bar = "{desc} ({n_fmt}/{total_fmt} | {elapsed} < {remaining})"
         desc = "VALIDATION - epoch:{:>3} loss:{:.4f} {:.4f}  error:{:.4f} {:.4f}"
         pbar = tqdm(total=len(eval_dataset_loader), ncols=90, leave=False,
                         desc=desc.format(epoch, 0, 0, 0, 0), bar_format=bar)
-        eval_loss_v = eval_loss_f = eval_error_v = eval_error_f = count_v = count_f = 0
+        eval_loss_discriminator, eval_loss_generator, eval_loss_v = eval_loss_f = eval_error_v = eval_error_f = count_v = count_f = 0
+        num_data = len(eval_dataset_loader)
         for i, data in enumerate(eval_dataset_loader):
             data = [d.to(device) for d in data]
-            vert_p, norm_p, _ = model(data)
-            loss_i_v = loss.loss_v(vert_p, data[0].y, opt.loss_v)
-            loss_i_f = loss.loss_n(norm_p, data[1].y, opt.loss_n)
-            error_i_v = loss.error_v(vert_p, data[0].y)
-            error_i_f = loss.error_n(norm_p, data[1].y)
+            vert_predict, norm_predict, _ = generator(data)
+            real_vertex_logits, real_facet_logits = discriminator(data[0].y, data[1].y, data[0].edge_index, data[1].edge_index)
+            fake_vertex_logits, fake_facet_logits = discriminator(vert_predict, norm_predict, data[0].edge_index, data[1].edge_index)
+            loss_i_discriminator = loss.discriminator_loss(real_vertex_logits, real_facet_logits, fake_vertex_logits, fake_facet_logits, device)
+            loss_i_generator = loss.generator_loss(fake_vertex_logits, fake_facet_logits, device)
+            loss_i_v = loss.loss_v(vert_predict, data[0].y, opt.loss_v)
+            loss_i_f = loss.loss_n(norm_predict, data[1].y, opt.loss_n)
+            error_i_v = loss.error_v(vert_predict, data[0].y)
+            error_i_f = loss.error_n(norm_predict, data[1].y)
 
+            eval_loss_discriminator += loss_i_discriminator
+            eval_loss_generator += loss_i_generator
             eval_loss_v += loss_i_v * data[0].num_nodes
             eval_loss_f += loss_i_f * data[1].num_nodes
             eval_error_v += error_i_v * data[0].num_nodes
@@ -224,10 +228,14 @@ def eval_model(model, eval_dataset_loader, device, epoch, opt, test_writer):
                     epoch, loss_i_v, loss_i_f, error_i_v, error_i_f)
             pbar.update(1)
         pbar.close()
+        eval_loss_discriminator /= num_data
+        eval_loss_generator /= num_data
         eval_loss_v /= count_v
         eval_loss_f /= count_f
         eval_error_v /= count_v
         eval_error_f /= count_f
+        test_writer.add_scalar('discriminator_loss', eval_loss_discriminator.item(), epoch)
+        test_writer.add_scalar('generator loss', eval_loss_generator.item(), epoch)
         test_writer.add_scalar('loss_v', eval_loss_v.item(), epoch)
         test_writer.add_scalar('loss_f', eval_loss_f.item(), epoch)
         test_writer.add_scalar('error_v', eval_error_v.item(), epoch)
