@@ -331,7 +331,7 @@ def train(opt):
 
         print_log = epoch%10==0
         train_one_epoch(generator, discriminator, train_dataset_loader, optimizer_generator, optimizer_discriminator, device, epoch, opt, train_writer)
-        eval_loss_v, eval_loss_f, eval_error_v, eval_error_f = eval_model(generator, eval_dataset, device, epoch, opt, test_writer)
+        eval_loss_v, eval_loss_f, eval_error_v, eval_error_f = eval_model(generator, discriminator, eval_dataset, device, epoch, opt, test_writer)
         if opt.lr_sch == 'auto':
             lr_sch_optimizer.step(eval_error_f)
             lr_sch_discriminator.step(eval_error_f)
