@@ -37,14 +37,14 @@ def discriminator_loss(real_vertex_logits, real_facet_logits, fake_vertex_logits
     # vertex loss
     target_real_vertex = torch.FloatTensor(real_vertex_logits.size()).uniform_(0.9, 1.0).to(device)
     target_fake_vertex = torch.FloatTensor(real_vertex_logits.size()).uniform_(0.0, 0.1).to(device)
-    real_vertex_loss = (real_vertex_logits - target_real_vertex).pow(2).sum(1).mean()
-    fake_vertex_loss = (fake_vertex_logits - target_fake_vertex).pow(2).sum(1).mean()
+    real_vertex_loss = torch.nn.functional.mse_loss(real_vertex_logits, target_real_vertex)
+    fake_vertex_loss = torch.nn.functional.mse_loss(fake_vertex_logits, target_fake_vertex)
 
     # facet loss
     target_real_facet = torch.FloatTensor(real_facet_logits.size()).uniform_(0.9, 1.0).to(device)
     target_fake_facet = torch.FloatTensor(real_facet_logits.size()).uniform_(0.0, 0.1).to(device)
-    real_facet_loss = (real_facet_logits - target_real_facet).pow(2).sum(1).mean()
-    fake_facet_loss = (fake_facet_logits - target_fake_facet).pow(2).sum(1).mean()
+    real_facet_loss = torch.nn.functional.mse_loss(real_facet_logits, target_real_facet)
+    fake_facet_loss = torch.nn.functional.mse_loss(fake_facet_logits, target_fake_facet)
 
     total_loss = real_vertex_loss+fake_vertex_loss+real_facet_loss+fake_facet_loss
     
@@ -54,15 +54,15 @@ def generator_loss(fake_vertex_logits, fake_facet_logits, device):
 
     # vertex loss
     target_real_vertex = torch.FloatTensor(fake_vertex_logits.size()).uniform_(0.9, 1.0).to(device)
-    vertex_loss = (fake_vertex_logits - target_real_vertex).pow(2).sum(1).mean()
+    vertex_loss = torch.nn.functional.mse_loss(fake_vertex_logits, target_real_vertex)
     
     # facet loss
     target_real_facet = torch.FloatTensor(fake_facet_logits.size()).uniform_(0.9, 1.0).to(device)
-    facet_loss = (fake_facet_logits - target_real_facet).pow(2).sum(1).mean()
+    facet_loss = torch.nn.functional.mse_loss(fake_facet_logits, target_real_facet)
     
     total_loss = vertex_loss+facet_loss
 
-    return total_loss*0.25
+    return total_loss*0.5
 
 def error_v(vp, v):
     """

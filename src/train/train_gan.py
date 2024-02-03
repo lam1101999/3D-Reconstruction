@@ -138,7 +138,7 @@ def train_one_epoch(generator, discriminator, train_dataset_loader, optimizer_ge
 
         # Generate fake data
         vert_predict, norm_predict, _ = generator(data)
-        vert_predict, norm_predict = vert_predict.detach(), norm_predict.detach()
+        # vert_predict, norm_predict = vert_predict.detach(), norm_predict.detach()
         # Calculate loss
         real_vertex_logits, real_facet_logits = discriminator(data[0].y, data[1].y, data[0].edge_index, data[1].edge_index)
         fake_vertex_logits, fake_facet_logits = discriminator(vert_predict, norm_predict, data[0].edge_index, data[1].edge_index)
@@ -158,7 +158,7 @@ def train_one_epoch(generator, discriminator, train_dataset_loader, optimizer_ge
 
         # Calculate generator Loss
         fake_vertex_logits, fake_facet_logits = discriminator(vert_predict, norm_predict, data[0].edge_index, data[1].edge_index)
-        fake_vertex_logits, fake_facet_logits = fake_vertex_logits.detach(), fake_facet_logits.detach()    
+        # fake_vertex_logits, fake_facet_logits = fake_vertex_logits.detach(), fake_facet_logits.detach()    
         generator_loss = loss.generator_loss(fake_vertex_logits, fake_facet_logits, device)
 
         # Calculate dual loss
@@ -201,7 +201,7 @@ def eval_model(generator, discriminator, eval_dataset_loader, device, epoch, opt
         desc = "VALIDATION - epoch:{:>3} loss:{:.4f} {:.4f}  error:{:.4f} {:.4f}"
         pbar = tqdm(total=len(eval_dataset_loader), ncols=90, leave=False,
                         desc=desc.format(epoch, 0, 0, 0, 0), bar_format=bar)
-        eval_loss_discriminator, eval_loss_generator, eval_loss_v = eval_loss_f = eval_error_v = eval_error_f = count_v = count_f = 0
+        eval_loss_discriminator = eval_loss_generator = eval_loss_v = eval_loss_f = eval_error_v = eval_error_f = count_v = count_f = 0
         num_data = len(eval_dataset_loader)
         for i, data in enumerate(eval_dataset_loader):
             data = [d.to(device) for d in data]
@@ -235,7 +235,7 @@ def eval_model(generator, discriminator, eval_dataset_loader, device, epoch, opt
         eval_error_v /= count_v
         eval_error_f /= count_f
         test_writer.add_scalar('discriminator_loss', eval_loss_discriminator.item(), epoch)
-        test_writer.add_scalar('generator loss', eval_loss_generator.item(), epoch)
+        test_writer.add_scalar('generator_loss', eval_loss_generator.item(), epoch)
         test_writer.add_scalar('loss_v', eval_loss_v.item(), epoch)
         test_writer.add_scalar('loss_f', eval_loss_f.item(), epoch)
         test_writer.add_scalar('error_v', eval_error_v.item(), epoch)
