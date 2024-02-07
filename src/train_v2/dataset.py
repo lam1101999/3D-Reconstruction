@@ -296,8 +296,8 @@ class DualDataset(torch_geometric.data.Dataset):
         # vertex graph
         position_vertex_normalized = (data_vertex.pos - data_vertex.centroid) * data_vertex.scale
         data_vertex.x = torch.cat((position_vertex_normalized, data_vertex.normal), 1) # normalized position of vertex, normal vector of vertex
-        data_vertex.y = None if data_vertex.y is None else (data_vertex.y - data_vertex.centroid)*data_vertex.scale
-        data_vertex.normal = data_vertex.centroid = data_vertex.scale = data_vertex.edge_dual = None
+        data_vertex.y = None if data_vertex.y is None else (data_vertex.y - data_vertex.centroid) * data_vertex.scale
+        data_vertex.normal = data_vertex.centroid  = data_vertex.edge_dual = None
         
 
 

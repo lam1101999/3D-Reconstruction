@@ -37,7 +37,7 @@ class DualGenerator(torch.nn.Module):
         # Calculate vertex features
         feat_v = self.gnn_v(data_vertex)
         feat_v_h_1 = torch.nn.functional.leaky_relu(self.fc_v1(feat_v), 0.2, inplace=True)
-        feat_v =self.fc_v2(feat_v_h_1)  # Change here
+        feat_v = self.fc_v2(feat_v_h_1)  # Change here
         if self.force_depth: # Constraint coordinate in the depth direction of original coordiante frame
             feat_v = feat_v * data_vertex.depth_direction
         feat_v += xyz
@@ -50,9 +50,8 @@ class DualGenerator(torch.nn.Module):
         feat_f = self.gnn_f(data_face)
         feat_f_h = torch.nn.functional.leaky_relu(self.fc_f1(feat_f), 0.2, inplace=True)
         feat_f = self.fc_f2(feat_f_h)
-        feat_f += nf
         
-        return feat_v, torch.nn.functional.normalize(feat_f, dim=1), None
+        return torch.nn.functional.tanh(feat_v), torch.nn.functional.normalize(feat_f, dim=1), None
 
 class GNNModule(torch.nn.Module):
     def __init__(self, in_channels=6, pool_type="max", pool_step=2, edge_weight_type=0, wei_param=2):
@@ -98,7 +97,6 @@ class DualDiscriminator(torch.nn.Module):
         super().__init__()
         self.force_depth = force_depth
         
-        self.gaussian_layer = GaussianNoise()
         # vertex graph
         self.discriminator_v = DiscriminatorModule(input_channels, 32, pool_type, 2, edge_weight_type, wei_param) #outchanneels = 32
         self.fc_v1 = torch.nn.Linear(16, 3)
@@ -109,31 +107,23 @@ class DualDiscriminator(torch.nn.Module):
         self.fc_f1 = torch.nn.Linear(16, 3)
         self.fc_f2 = torch.nn.Linear(3,3)
 
-    def forward(self, x_vertex=None, x_facet=None, vertex_graph=None, facet_graph=None, edge_index_v=None, edge_index_f=None, add_gaussian = False):
+    def forward(self, x_vertex=None, x_facet=None, vertex_graph=None, facet_graph=None, edge_index_v=None, edge_index_f=None):
         vertex_graph, facet_graph =  vertex_graph.clone(), facet_graph.clone()
-
+        # vertex graph
         if x_vertex is not None and x_facet is not None:
             x_vertex, x_facet = x_vertex.clone(), x_facet.clone()
             vertex_graph = torch.cat([x_vertex,vertex_graph], dim=1)
             facet_graph = torch.cat([x_facet,facet_graph], dim=1)
-            
-        # vertex graph
-        vertex_graph = self.gaussian_layer(vertex_graph)
         vertex_graph = self.discriminator_v(vertex_graph, edge_index_v)
-        vertex_graph = self.gaussian_layer(vertex_graph)
         vertex_graph = torch.nn.functional.leaky_relu(self.fc_v1(vertex_graph), 0.2, inplace=True)
-        vertex_graph = self.gaussian_layer(vertex_graph)
         vertex_graph = self.fc_v2(vertex_graph)
 
         # facet graph
-        facet_graph = self.gaussian_layer(facet_graph)
         facet_graph = self.discriminator_f(facet_graph, edge_index_f)
-        facet_graph = self.gaussian_layer(facet_graph)
         facet_graph = torch.nn.functional.leaky_relu(self.fc_f1(facet_graph), 0.2, inplace=True)
-        facet_graph = self.gaussian_layer(facet_graph)
         facet_graph = self.fc_f2(facet_graph)
 
-        return vertex_graph, facet_graph
+        return torch.nn.functional.tanh(vertex_graph), torch.nn.functional.tanh(facet_graph)
 
 class DiscriminatorModule(torch.nn.Module):
 
@@ -315,17 +305,3 @@ class PoolingLayer(torch.nn.Module):
         if self.unpooling_indices is not None:
             x = x[self.unpooling_indices]
         return x
-class GaussianNoise(torch.nn.Module):
-    def __init__(self, std=0.1, decay_rate=0):
-        super().__init__()
-        self.std = std
-        self.decay_rate = decay_rate
-
-    def decay_step(self):
-        self.std = max(self.std - self.decay_rate, 0)
-
-    def forward(self, x):
-        if self.training:
-            return x + torch.empty_like(x).normal_(std=self.std)
-        else:
-            return x

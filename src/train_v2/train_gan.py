@@ -31,7 +31,7 @@ def parse_argument():
     parser.add_argument("--sub_size", type=int, default=20000, help="The facet count of submesh if split big mesh[default:20000]")
     parser.add_argument('--loss_v', type=str, default='L1',
                         help='vertex loss [default: L1]')
-    parser.add_argument('--loss_n', type=str, default='cos',
+    parser.add_argument('--loss_n', type=str, default='L1',
                         help='normal loss [default: L1]')
     parser.add_argument('--loss_v_scale', type=float,
                         default=1, help='vertex loss scale [default: 1]')
@@ -141,12 +141,8 @@ def train_one_epoch(generator, discriminator, train_dataset_loader, optimizer_ge
         vert_predict, norm_predict = vert_predict.detach(), norm_predict.detach()
         # Calculate loss
 
-        # real_vertex_logits, real_facet_logits = discriminator(data[0].x[:,0:3], data[1].x[:,3:6], data[0].y, data[1].y, data[0].edge_index, data[1].edge_index, add_gaussian=True)
-        # fake_vertex_logits, fake_facet_logits = discriminator(data[0].x[:,0:3], data[1].x[:,3:6], vert_predict, norm_predict, data[0].edge_index, data[1].edge_index, add_gaussian=True)
-
-        real_vertex_logits, real_facet_logits = discriminator(None, None, data[0].y, data[1].y, data[0].edge_index, data[1].edge_index, add_gaussian=True)
-        fake_vertex_logits, fake_facet_logits = discriminator(None, None, vert_predict, norm_predict, data[0].edge_index, data[1].edge_index, add_gaussian=True)
-
+        real_vertex_logits, real_facet_logits = discriminator(data[0].x[:,0:3], data[1].x[:,3:6], data[0].y, data[1].y, data[0].edge_index, data[1].edge_index)
+        fake_vertex_logits, fake_facet_logits = discriminator(data[0].x[:,0:3], data[1].x[:,3:6], vert_predict, norm_predict, data[0].edge_index, data[1].edge_index)
 
         discriminator_loss = loss.discriminator_loss(real_vertex_logits, real_facet_logits, fake_vertex_logits, fake_facet_logits, device)
 
@@ -166,19 +162,18 @@ def train_one_epoch(generator, discriminator, train_dataset_loader, optimizer_ge
         vert_predict, norm_predict, _ = generator(data)
 
         # Calculate generator Loss
-        # fake_vertex_logits, fake_facet_logits = discriminator(data[0].x[:,0:3], data[1].x[:,3:6], vert_predict, norm_predict, data[0].edge_index, data[1].edge_index, add_gaussian=True)
-
-        fake_vertex_logits, fake_facet_logits = discriminator(None, None, vert_predict, norm_predict, data[0].edge_index, data[1].edge_index, add_gaussian=True)
-
+        fake_vertex_logits, fake_facet_logits = discriminator(data[0].x[:,0:3], data[1].x[:,3:6], vert_predict, norm_predict, data[0].edge_index, data[1].edge_index)
         generator_loss = loss.generator_loss(fake_vertex_logits, fake_facet_logits, device)
 
         # Calculate dual loss
         # ==================================
-        train_loss_v = 1/2*(loss.loss_v(vert_predict, data[0].y, "L1") + loss.loss_v(vert_predict, data[0].y, "L2"))
-        train_loss_f = 1/3*(loss.loss_n(norm_predict, data[1].y, "L1") + loss.loss_n(norm_predict, data[1].y, "L2") + loss.loss_n(norm_predict, data[1].y, "cos"))
-        dual_loss = 50*loss.dual_loss(
+        train_loss_v = loss.loss_v(vert_predict, data[0].y, opt.loss_v)
+        train_loss_f = loss.loss_n(norm_predict, data[1].y, opt.loss_n)
+        dual_loss = 10*loss.dual_loss(
                 train_loss_v, train_loss_f, v_scale=opt.loss_v_scale, n_scale=opt.loss_n_scale)
         
+        # Calculate identity loss
+        # identity_loss = torch.nn.functional.l1_loss()
         # Calculate gradient generator
         total_generator_loss = generator_loss + dual_loss
         total_generator_loss /= opt.batch_size
@@ -216,17 +211,16 @@ def eval_model(generator, discriminator, eval_dataset_loader, device, epoch, opt
         for i, data in enumerate(eval_dataset_loader):
             data = [d.to(device) for d in data]
             vert_predict, norm_predict, _ = generator(data)
+            vert_predict = vert_predict*data[0].scale
+            data[0].y = data[0].y*data[0].scale
 
-            # real_vertex_logits, real_facet_logits = discriminator(data[0].x[:,0:3], data[1].x[:,3:6], data[0].y, data[1].y, data[0].edge_index, data[1].edge_index, add_gaussian=True)
-            # fake_vertex_logits, fake_facet_logits = discriminator(data[0].x[:,0:3], data[1].x[:,3:6], vert_predict, norm_predict, data[0].edge_index, data[1].edge_index, add_gaussian=True)
-
-            real_vertex_logits, real_facet_logits = discriminator(None, None, data[0].y, data[1].y, data[0].edge_index, data[1].edge_index, add_gaussian=True)
-            fake_vertex_logits, fake_facet_logits = discriminator(None, None, vert_predict, norm_predict, data[0].edge_index, data[1].edge_index, add_gaussian=True)
+            real_vertex_logits, real_facet_logits = discriminator(data[0].x[:,0:3], data[1].x[:,3:6], data[0].y, data[1].y, data[0].edge_index, data[1].edge_index)
+            fake_vertex_logits, fake_facet_logits = discriminator(data[0].x[:,0:3], data[1].x[:,3:6], vert_predict, norm_predict, data[0].edge_index, data[1].edge_index)
 
             loss_i_discriminator = loss.discriminator_loss(real_vertex_logits, real_facet_logits, fake_vertex_logits, fake_facet_logits, device)
             loss_i_generator = loss.generator_loss(fake_vertex_logits, fake_facet_logits, device)
-            loss_i_v = loss.loss_v(vert_predict, data[0].y, "L1") + loss.loss_v(vert_predict, data[0].y, "L2")
-            loss_i_f = loss.loss_n(norm_predict, data[1].y, "L1") + loss.loss_n(norm_predict, data[1].y, "L2") + loss.loss_n(norm_predict, data[1].y, "cos")
+            loss_i_v = loss.loss_v(vert_predict, data[0].y, opt.loss_v)
+            loss_i_f = loss.loss_n(norm_predict, data[1].y, opt.loss_n)
             error_i_v = loss.error_v(vert_predict, data[0].y)
             error_i_f = loss.error_n(norm_predict, data[1].y)
 
@@ -286,7 +280,6 @@ def train(opt):
     log_dir = os.path.join(LOG_DIR, flag, training_time)
     os.makedirs(log_dir, exist_ok=True)
     sys.stdout = Print_Logger(os.path.join(log_dir, "training_info.txt"))
-    print(opt)
     opt.model_name = f"{training_name}_model.pth"
     opt.params_name = f"{training_name}_params.pth"
     opt.restore_name = f"{training_name}_restore.pth"
@@ -317,7 +310,7 @@ def train(opt):
     
     # 3. Prepare Model
     generator = network.DualGenerator(force_depth=opt.force_depth, pool_type=opt.pool_type, wei_param=opt.wei_param)
-    discriminator = network.DualDiscriminator(input_channels=3, force_depth=opt.force_depth, pool_type=opt.pool_type, wei_param=opt.wei_param)
+    discriminator = network.DualDiscriminator(input_channels=6, force_depth=opt.force_depth, pool_type=opt.pool_type, wei_param=opt.wei_param)
     total_params_generator = sum(p.numel() for p in generator.parameters())
     total_params_discriminator = sum(p.numel() for p in discriminator.parameters())
     print("Total parameters generator: ", total_params_generator)
@@ -342,12 +335,6 @@ def train(opt):
         
     # 4. Training
     time_start = datetime.now()
-    # Add graph
-    # dataiter = iter(train_dataset_loader)
-    # data = next(dataiter)
-    # train_writer.add_graph(generator, data)
-    # train_writer.add_graph(discriminator, (data[0].x[:,0:3], data[1].x[:,3:6], data[0].y, data[1].y, data[0].edge_index, data[1].edge_index))
-
 
     for epoch in range(last_epoch, opt.max_epoch):
 
