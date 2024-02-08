@@ -198,8 +198,8 @@ def train(opt):
             data = [d.to(device) for d in data]
             vert_predict, norm_predict,_ = model(data)
             
-            train_loss_v = 1/2*(loss.loss_v(vert_predict, data[0].y, "L1") + loss.loss_v(vert_predict, data[0].y, "L2"))
-            train_loss_f =  loss.loss_n(norm_predict, data[1].y, "cos")
+            train_loss_v = loss.loss_v_total(vert_predict, data[0].y)
+            train_loss_f =  loss.loss_n_total(norm_predict, data[1].y)
             train_loss = loss.dual_loss(train_loss_v, train_loss_f, v_scale=opt.loss_v_scale, n_scale=opt.loss_n_scale)
             train_error_v = loss.error_v(vert_predict, data[0].y)
             train_error_f = loss.error_n(norm_predict, data[1].y)
@@ -240,8 +240,8 @@ def train(opt):
             for i, data in enumerate(eval_dataset):
                 data = [d.to(device) for d in data]
                 vert_p, norm_p, _ = model(data)
-                loss_i_v = loss.loss_v(vert_p, data[0].y, opt.loss_v)
-                loss_i_f = loss.loss_n(norm_p, data[1].y, opt.loss_n)
+                loss_i_v = loss.loss_v_total(vert_p, data[0].y)
+                loss_i_f = loss.loss_n_total(norm_p, data[1].y)
                 error_i_v = loss.error_v(vert_p, data[0].y)
                 error_i_f = loss.error_n(norm_p, data[1].y)
 

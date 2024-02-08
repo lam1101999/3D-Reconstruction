@@ -16,6 +16,8 @@ def loss_v(vp, v, dis='L2', apply_icp=False):
         loss = (vp-v).pow(2).sum(1).mean()
     return loss
 
+def loss_v_total(vert_predict, vert_true):
+    return 1/2*(loss_v(vert_predict, vert_true, "L1") + loss_v(vert_predict, vert_true, "L2"))
 
 def loss_n(np, n, norm='L1', fc_p=None, fc=None):
     if norm == 'L1':
@@ -28,6 +30,9 @@ def loss_n(np, n, norm='L1', fc_p=None, fc=None):
         loss = loss.mean()
 
     return loss
+
+def loss_n_total(norm_predict, norm_true):
+    return loss_n(norm_predict, norm_true, "cos")
 
 
 def dual_loss(loss_v, loss_n, v_scale=1, n_scale=1, alpha=None):
