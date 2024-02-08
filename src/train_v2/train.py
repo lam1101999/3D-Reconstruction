@@ -199,7 +199,7 @@ def train(opt):
             vert_predict, norm_predict,_ = model(data)
             
             train_loss_v = 1/2*(loss.loss_v(vert_predict, data[0].y, "L1") + loss.loss_v(vert_predict, data[0].y, "L2"))
-            train_loss_f = 1/3*(loss.loss_n(norm_predict, data[1].y, "L1") + loss.loss_n(norm_predict, data[1].y, "L2") + loss.loss_n(norm_predict, data[1].y, "cos"))
+            train_loss_f =  loss.loss_n(norm_predict, data[1].y, "cos")
             train_loss = loss.dual_loss(train_loss_v, train_loss_f, v_scale=opt.loss_v_scale, n_scale=opt.loss_n_scale)
             train_error_v = loss.error_v(vert_predict, data[0].y)
             train_error_f = loss.error_n(norm_predict, data[1].y)

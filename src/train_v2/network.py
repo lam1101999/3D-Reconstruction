@@ -51,12 +51,13 @@ class DualGenerator(torch.nn.Module):
         feat_f_h = torch.nn.functional.leaky_relu(self.fc_f1(feat_f), 0.2, inplace=True)
         feat_f = self.fc_f2(feat_f_h)
         
-        return torch.nn.functional.tanh(feat_v), torch.nn.functional.normalize(feat_f, dim=1), None
+        return feat_v, torch.nn.functional.normalize(feat_f, dim=1), None
 
 class GNNModule(torch.nn.Module):
     def __init__(self, in_channels=6, pool_type="max", pool_step=2, edge_weight_type=0, wei_param=2):
         super().__init__()
         
+        self.gaussian_layer = GaussianNoise()
         self.l_conv1 = FeaStConv(in_channels, 32, 9)
         self.pooling1 = PoolingLayer(32, pool_type, pool_step, edge_weight_type, wei_param)
         self.l_conv2 = FeaStConv(32, 64, 9)
@@ -77,6 +78,8 @@ class GNNModule(torch.nn.Module):
         data_r3 = self.pooling2(data_r2)
         data_r3.x = torch.nn.functional.leaky_relu(self.l_conv3(data_r3.x, data_r3.edge_index), 0.2, inplace=True) # [N, 128]
         data_r3.x = torch.nn.functional.leaky_relu(self.l_conv4(data_r3.x, data_r3.edge_index), 0.2, inplace=True) # [N, 128]
+
+        data_r3.x = self.gaussian_layer(data_r3.x) # change here
 
         feat_r2_r = self.pooling2.unpooling(data_r3.x) # [N, 128]
         feat_r2_r = self.r_conv1(feat_r2_r, data_r2.edge_index) # [N, 64]
@@ -123,7 +126,7 @@ class DualDiscriminator(torch.nn.Module):
         facet_graph = torch.nn.functional.leaky_relu(self.fc_f1(facet_graph), 0.2, inplace=True)
         facet_graph = self.fc_f2(facet_graph)
 
-        return torch.nn.functional.tanh(vertex_graph), torch.nn.functional.tanh(facet_graph)
+        return vertex_graph, facet_graph
 
 class DiscriminatorModule(torch.nn.Module):
 
@@ -305,3 +308,18 @@ class PoolingLayer(torch.nn.Module):
         if self.unpooling_indices is not None:
             x = x[self.unpooling_indices]
         return x
+
+class GaussianNoise(torch.nn.Module):
+    def __init__(self, std=0.1, decay_rate=0):
+        super().__init__()
+        self.std = std
+        self.decay_rate = decay_rate
+
+    def decay_step(self):
+        self.std = max(self.std - self.decay_rate, 0)
+
+    def forward(self, x):
+        if self.training:
+            return x + torch.empty_like(x).normal_(std=self.std)
+        else:
+            return x

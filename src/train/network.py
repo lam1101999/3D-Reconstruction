@@ -18,6 +18,7 @@ class DualGenerator(torch.nn.Module):
         super().__init__()
         self.force_depth = force_depth
         
+
         # vertex graph
         self.gnn_v = GNNModule(6, pool_type, 2, edge_weight_type, wei_param) #outchanneels = 32
         self.fc_v1 = torch.nn.Linear(32, 1024)
