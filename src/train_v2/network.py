@@ -57,7 +57,6 @@ class GNNModule(torch.nn.Module):
     def __init__(self, in_channels=6, pool_type="max", pool_step=2, edge_weight_type=0, wei_param=2):
         super().__init__()
         
-        self.gaussian_layer = GaussianNoise()
         self.l_conv1 = FeaStConv(in_channels, 32, 9)
         self.pooling1 = PoolingLayer(32, pool_type, pool_step, edge_weight_type, wei_param)
         self.l_conv2 = FeaStConv(32, 64, 9)
@@ -78,8 +77,6 @@ class GNNModule(torch.nn.Module):
         data_r3 = self.pooling2(data_r2)
         data_r3.x = torch.nn.functional.leaky_relu(self.l_conv3(data_r3.x, data_r3.edge_index), 0.2, inplace=True) # [N, 128]
         data_r3.x = torch.nn.functional.leaky_relu(self.l_conv4(data_r3.x, data_r3.edge_index), 0.2, inplace=True) # [N, 128]
-
-        data_r3.x = self.gaussian_layer(data_r3.x) # change here
 
         feat_r2_r = self.pooling2.unpooling(data_r3.x) # [N, 128]
         feat_r2_r = self.r_conv1(feat_r2_r, data_r2.edge_index) # [N, 64]

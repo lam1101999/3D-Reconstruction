@@ -3,4 +3,4 @@ __pycache__
 *.zip
 *.obj
 dataset
-log/
+log*/

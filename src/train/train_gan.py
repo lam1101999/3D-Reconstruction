@@ -174,9 +174,9 @@ def train_one_epoch(generator, discriminator, train_dataset_loader, optimizer_ge
 
         # Calculate dual loss
         # ==================================
-        train_loss_v = 1/2*(loss.loss_v(vert_predict, data[0].y, "L1") + loss.loss_v(vert_predict, data[0].y, "L2"))
-        train_loss_f = 1/3*(loss.loss_n(norm_predict, data[1].y, "L1") + loss.loss_n(norm_predict, data[1].y, "L2") + loss.loss_n(norm_predict, data[1].y, "cos"))
-        dual_loss = 50*loss.dual_loss(
+        train_loss_v = loss.loss_v(vert_predict, data[0].y, "L1") 
+        train_loss_f = 1/2*(loss.loss_n(norm_predict, data[1].y, "L1")  + loss.loss_n(norm_predict, data[1].y, "cos"))
+        dual_loss = 100*loss.dual_loss(
                 train_loss_v, train_loss_f, v_scale=opt.loss_v_scale, n_scale=opt.loss_n_scale)
         
         # Calculate gradient generator
@@ -282,7 +282,7 @@ def train(opt):
     
     # 1. Prepare path
     CODE_DIR = os.path.dirname(os.path.abspath(__file__))
-    LOG_DIR = os.path.join(CODE_DIR,"log")
+    LOG_DIR = os.path.join(os.path.dirname(CODE_DIR),"log_v1")
     log_dir = os.path.join(LOG_DIR, flag, training_time)
     os.makedirs(log_dir, exist_ok=True)
     sys.stdout = Print_Logger(os.path.join(log_dir, "training_info.txt"))
@@ -301,6 +301,9 @@ def train(opt):
         restore_best_error = restore_params.get('best_error', None)
     else:
         restore_params = dict()
+
+    # backup code
+    shutil.copytree(CODE_DIR, os.path.join(log_dir, 'code_bak'))
 
     # tensorboard
     train_writer = SummaryWriter(os.path.join(log_dir, 'train'))
@@ -342,11 +345,6 @@ def train(opt):
         
     # 4. Training
     time_start = datetime.now()
-    # Add graph
-    # dataiter = iter(train_dataset_loader)
-    # data = next(dataiter)
-    # train_writer.add_graph(generator, data)
-    # train_writer.add_graph(discriminator, (data[0].x[:,0:3], data[1].x[:,3:6], data[0].y, data[1].y, data[0].edge_index, data[1].edge_index))
 
 
     for epoch in range(last_epoch, opt.max_epoch):

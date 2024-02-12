@@ -32,7 +32,7 @@ def loss_n(np, n, norm='L1', fc_p=None, fc=None):
     return loss
 
 def loss_n_total(norm_predict, norm_true):
-    return loss_n(norm_predict, norm_true, "cos")
+    return loss_n(norm_predict, norm_true, "L2")
 
 
 def dual_loss(loss_v, loss_n, v_scale=1, n_scale=1, alpha=None):

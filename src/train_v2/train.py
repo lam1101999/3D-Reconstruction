@@ -112,7 +112,7 @@ def train(opt):
     
     # 1. Prepare path
     CODE_DIR = os.path.dirname(os.path.abspath(__file__))
-    LOG_DIR = os.path.join(CODE_DIR,"log")
+    LOG_DIR = os.path.join(os.path.dirname(CODE_DIR),"log_v2")
     log_dir = os.path.join(LOG_DIR, flag, training_time)
     os.makedirs(log_dir, exist_ok=True)
     sys.stdout = Print_Logger(os.path.join(log_dir, "training_info.txt"))
@@ -136,6 +136,9 @@ def train(opt):
     test_writer = SummaryWriter(os.path.join(log_dir, 'test'))
     test_writer.add_text('train_params', str(opt))
     
+    # backup code
+    shutil.copytree(CODE_DIR, os.path.join(log_dir, 'code_bak'))
+
     # 2. Prepare data
     print("==="*30)
     train_dataset = DualDataset(opt.data_type, train_or_test="train", filter_patch_count=opt.filter_patch_count, submesh_size=opt.sub_size, transform = RandomRotate(False))
