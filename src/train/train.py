@@ -301,8 +301,8 @@ def main():
     params_file = train(opt)
     # params_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),"log", "GeoBi-GNN_Synthetic_2024-01-09-22-11-14", "GeoBi-GNN_Synthetic_params.pth")
     
-    from test_result import predict_dir
-    predict_dir(params_file, data_dir=None, sub_size=opt.sub_size, gpu=-1)
+    from test_result import evaluate_dir
+    evaluate_dir(params_file, data_dir=None, sub_size=opt.sub_size, gpu=-1)
 
 if __name__ == "__main__":
     main()

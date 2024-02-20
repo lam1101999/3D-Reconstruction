@@ -148,7 +148,8 @@ def calc_weight(node_position, node_normal, edge_index):
     Returns:
     - torch.Tensor: The weight of the node
     """
-    
+    # check the shape
+    node_normal = node_normal if len(node_normal.size())==2 else node_normal.unsqueeze(0)
     eps = 0.001
     edge_len = node_position[edge_index]
     # edge_len = ((edge_len[0] - edge_len[1])**2).sum(1)**0.5 # Warning this code is differnet with original one

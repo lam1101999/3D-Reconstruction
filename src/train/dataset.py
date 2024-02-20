@@ -152,7 +152,7 @@ class DualDataset(torch_geometric.data.Dataset):
             obj (object): An object (default: None).
         
         Returns:
-            list: A list of tuples containing the processed data. 
+            list: A list of tuples containing the processed data. This is because mesh can be split into smaller submeshes.
                 Each tuple contains (noisy data, original data:optional), v_idx:optional, select_face:optional.
         """
         filter_patch_count = 0 if obj is None else obj.filter_patch_count
@@ -248,6 +248,7 @@ class DualDataset(torch_geometric.data.Dataset):
         # vertex graph
         position_v = torch.from_numpy(noisy_mesh.points()).float()
         normal_v = torch.from_numpy(noisy_mesh.vertex_normals()).float()
+        normal_f = normal_v if len(normal_v.size())==2 else normal_v.unsqueeze(0)
         edge_idx_v = ev_indices.T # directed graph, no self_loops
         edge_idx_v = to_undirected(edge_idx_v)
         edge_idx_v,_ = add_self_loops(edge_idx_v)
@@ -260,6 +261,7 @@ class DualDataset(torch_geometric.data.Dataset):
         # face graph
         position_f = position_v[fv_indices].mean(1).float()
         normal_f = torch.from_numpy(noisy_mesh.face_normals()).float()
+        normal_f = normal_f if len(normal_f.size())==2 else normal_f.unsqueeze(0)
         edge_idx_f = data_utils.build_facet_graph(fv_indices, vf_indices) # undirected graph, with self loops
         edge_weight_f = data_utils.calc_weight(position_f, normal_f, edge_idx_f).float()
         graph_face = Data(pos=position_f, normal = normal_f, edge_index=edge_idx_f, edge_weight = edge_weight_f, fv_indices=fv_indices, edge_dual=edge_dual_fv[0])

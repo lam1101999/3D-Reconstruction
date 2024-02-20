@@ -282,7 +282,7 @@ def train(opt):
     
     # 1. Prepare path
     CODE_DIR = os.path.dirname(os.path.abspath(__file__))
-    LOG_DIR = os.path.join(os.path.dirname(CODE_DIR),"log_v1")
+    LOG_DIR = os.path.join(os.path.dirname(CODE_DIR),"log")
     log_dir = os.path.join(LOG_DIR, flag, training_time)
     os.makedirs(log_dir, exist_ok=True)
     sys.stdout = Print_Logger(os.path.join(log_dir, "training_info.txt"))
@@ -396,8 +396,8 @@ def main():
     params_file = train(opt)
     # params_file = os.path.join(os.path.dirname(os.path.abspath(__file__)),"log", "GeoBi-GNN_Synthetic_2024-01-09-22-11-14", "GeoBi-GNN_Synthetic_params.pth")
     
-    from test_result import predict_dir
-    predict_dir(params_file, data_dir=None, sub_size=opt.sub_size, gpu=-1)
+    from test_result import evaluate_dir
+    evaluate_dir(params_file, data_dir=None, sub_size=opt.sub_size, gpu=-1)
 
 if __name__ == "__main__":
     main()
