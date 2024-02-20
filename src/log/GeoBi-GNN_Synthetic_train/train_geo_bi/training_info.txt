@@ -1,0 +1,440 @@
+==========================================================================================
+Load processed information!
+Load processed information!
+train_dataset: 356 samples
+Testing set: 916 samples
+Total parameters:  939128
+cuda
+Epoch   0:  0:02:08  loss:0.2406 1.1211 | error:0.1642 46.2732  lr:1.0000e-03 - save model
+Epoch   1:  0:04:16  loss:0.2441 0.3766 | error:0.1645 14.5188  lr:9.9990e-04 - save model
+Epoch   2:  0:06:26  loss:0.2348 0.2825 | error:0.1579 10.8747  lr:9.9980e-04 - save model
+Epoch   3:  0:08:34  loss:0.2298 0.2607 | error:0.1546 9.9914  lr:9.9970e-04 - save model
+Epoch   5:  0:12:52  loss:0.2222 0.1917 | error:0.1494 7.3914  lr:9.9950e-04 - save model
+Epoch   6:  0:15:02  loss:0.2157 0.1801 | error:0.1449 6.9609  lr:9.9940e-04 - save model
+Epoch   8:  0:19:20  loss:0.2078 0.1750 | error:0.1397 6.7452  lr:9.9920e-04 - save model
+Epoch  10:  0:23:38  loss:0.1985 0.1747 | error:0.1334 6.7388  lr:9.9900e-04 - save model
+Epoch  16:  0:38:07  loss:0.1888 0.1639 | error:0.1273 6.3029  lr:9.9840e-04 - save model
+Epoch  20:  0:47:34  loss:0.1776 0.1875 | error:0.1198 7.2903  lr:9.9800e-04
+Epoch  21:  0:49:41  loss:0.1761 0.1599 | error:0.1188 6.1594  lr:9.9790e-04 - save model
+Epoch  26:  1:00:19  loss:0.1563 0.1576 | error:0.1057 6.0514  lr:9.9740e-04 - save model
+Epoch  30:  1:08:51  loss:0.1501 0.1613 | error:0.1018 6.1991  lr:9.9700e-04
+Epoch  34:  1:17:22  loss:0.1470 0.1562 | error:0.0995 5.9815  lr:9.9660e-04 - save model
+Epoch  39:  1:28:00  loss:0.1385 0.1518 | error:0.0938 5.8309  lr:9.9611e-04 - save model
+Epoch  40:  1:30:08  loss:0.1430 0.1642 | error:0.0969 6.2940  lr:9.9601e-04
+Epoch  41:  1:32:16  loss:0.1403 0.1467 | error:0.0952 5.6375  lr:9.9591e-04 - save model
+Epoch  42:  1:34:24  loss:0.1394 0.1460 | error:0.0946 5.6102  lr:9.9581e-04 - save model
+Epoch  45:  1:40:47  loss:0.1365 0.1422 | error:0.0926 5.4666  lr:9.9551e-04 - save model
+Epoch  47:  1:45:03  loss:0.1339 0.1416 | error:0.0907 5.4473  lr:9.9531e-04 - save model
+Epoch  48:  1:47:10  loss:0.1332 0.1416 | error:0.0903 5.4390  lr:9.9521e-04 - save model
+Epoch  49:  1:49:17  loss:0.1373 0.1374 | error:0.0930 5.2816  lr:9.9511e-04 - save model
+Epoch  50:  1:51:25  loss:0.1364 0.1535 | error:0.0923 5.8987  lr:9.9501e-04
+Epoch  51:  1:53:31  loss:0.1353 0.1355 | error:0.0915 5.2064  lr:9.9491e-04 - save model
+Epoch  57:  2:06:15  loss:0.1381 0.1334 | error:0.0935 5.1299  lr:9.9431e-04 - save model
+Epoch  60:  2:12:38  loss:0.1311 0.1865 | error:0.0888 7.2048  lr:9.9401e-04
+Epoch  70:  2:33:50  loss:0.1330 0.1455 | error:0.0902 5.6164  lr:9.9302e-04
+Epoch  80:  2:55:07  loss:0.1308 0.1318 | error:0.0884 5.0679  lr:9.9203e-04 - save model
+Epoch  90:  3:16:20  loss:0.1262 0.1307 | error:0.0853 5.0255  lr:9.9104e-04 - save model
+Epoch 100:  3:37:30  loss:0.1251 0.1333 | error:0.0847 5.1326  lr:9.9004e-04
+Epoch 110:  3:58:20  loss:0.1220 0.1344 | error:0.0825 5.1645  lr:9.8905e-04
+Epoch 116:  4:11:00  loss:0.1202 0.1282 | error:0.0814 4.9297  lr:9.8846e-04 - save model
+Epoch 120:  4:19:23  loss:0.1228 0.1326 | error:0.0832 5.0981  lr:9.8807e-04
+Epoch 130:  4:40:15  loss:0.1221 0.1330 | error:0.0826 5.1068  lr:9.8708e-04
+Epoch 135:  4:50:42  loss:0.1205 0.1276 | error:0.0818 4.9021  lr:9.8658e-04 - save model
+Epoch 140:  5:01:08  loss:0.1252 0.1536 | error:0.0844 5.9103  lr:9.8609e-04
+Epoch 150:  5:22:01  loss:0.1159 0.1316 | error:0.0785 5.0619  lr:9.8510e-04
+Epoch 157:  5:36:36  loss:0.1190 0.1275 | error:0.0804 4.9021  lr:9.8441e-04 - save model
+Epoch 158:  5:38:42  loss:0.1205 0.1275 | error:0.0815 4.8979  lr:9.8432e-04 - save model
+Epoch 160:  5:42:51  loss:0.1219 0.1274 | error:0.0825 4.8965  lr:9.8412e-04 - save model
+Epoch 162:  5:47:01  loss:0.1158 0.1271 | error:0.0784 4.8850  lr:9.8392e-04 - save model
+Epoch 170:  6:03:40  loss:0.1152 0.1300 | error:0.0780 5.0016  lr:9.8314e-04
+Epoch 171:  6:05:45  loss:0.1143 0.1259 | error:0.0774 4.8376  lr:9.8304e-04 - save model
+Epoch 180:  6:24:37  loss:0.1177 0.1332 | error:0.0797 5.1295  lr:9.8215e-04
+Epoch 189:  6:43:24  loss:0.1134 0.1251 | error:0.0768 4.8074  lr:9.8127e-04 - save model
+Epoch 190:  6:45:29  loss:0.1209 0.1283 | error:0.0816 4.9292  lr:9.8117e-04
+Epoch 198:  7:02:14  loss:0.1138 0.1242 | error:0.0770 4.7744  lr:9.8039e-04 - save model
+Epoch 200:  7:06:24  loss:0.1214 0.1579 | error:0.0822 6.0525  lr:9.8019e-04
+Epoch 210:  7:27:21  loss:0.1134 0.1271 | error:0.0768 4.8864  lr:9.7921e-04
+Epoch 215:  7:37:47  loss:0.1114 0.1233 | error:0.0753 4.7368  lr:9.7872e-04 - save model
+Epoch 220:  7:48:12  loss:0.1185 0.1385 | error:0.0802 5.3148  lr:9.7823e-04
+Epoch 230:  8:09:08  loss:0.1144 0.1276 | error:0.0772 4.9068  lr:9.7725e-04
+Epoch 240:  8:30:03  loss:0.1147 0.1341 | error:0.0776 5.1715  lr:9.7627e-04
+Epoch 242:  8:34:13  loss:0.1129 0.1221 | error:0.0764 4.6925  lr:9.7608e-04 - save model
+Epoch 250:  8:50:56  loss:0.1138 0.1605 | error:0.0770 6.1585  lr:9.7530e-04
+Epoch 260:  9:12:02  loss:0.1104 0.1241 | error:0.0747 4.7685  lr:9.7432e-04
+Epoch 270:  9:32:53  loss:0.1125 0.1465 | error:0.0761 5.6254  lr:9.7335e-04
+Epoch 280:  9:53:44  loss:0.1112 0.1249 | error:0.0751 4.7935  lr:9.7237e-04
+Epoch 290: 10:14:38  loss:0.1091 0.1287 | error:0.0738 4.9470  lr:9.7140e-04
+Epoch 300: 10:35:33  loss:0.1147 0.1371 | error:0.0773 5.2930  lr:9.7043e-04
+Epoch 310: 10:56:26  loss:0.1092 0.1526 | error:0.0739 5.8474  lr:9.6946e-04
+Epoch 314: 11:04:46  loss:0.1095 0.1214 | error:0.0741 4.6619  lr:9.6907e-04 - save model
+Epoch 318: 11:13:09  loss:0.1115 0.1212 | error:0.0754 4.6564  lr:9.6868e-04 - save model
+Epoch 320: 11:17:23  loss:0.1093 0.1217 | error:0.0739 4.6752  lr:9.6849e-04
+Epoch 330: 11:38:13  loss:0.1151 0.1351 | error:0.0777 5.1852  lr:9.6752e-04
+Epoch 339: 11:57:02  loss:0.1073 0.1204 | error:0.0725 4.6258  lr:9.6665e-04 - save model
+Epoch 340: 11:59:07  loss:0.1079 0.1463 | error:0.0729 5.6739  lr:9.6656e-04
+Epoch 350: 12:20:01  loss:0.1103 0.1231 | error:0.0746 4.7267  lr:9.6559e-04
+Epoch 356: 12:32:31  loss:0.1069 0.1201 | error:0.0722 4.6128  lr:9.6501e-04 - save model
+Epoch 358: 12:36:42  loss:0.1067 0.1196 | error:0.0722 4.5976  lr:9.6482e-04 - save model
+Epoch 360: 12:40:52  loss:0.1082 0.1242 | error:0.0733 4.7678  lr:9.6462e-04
+Epoch 370: 13:01:45  loss:0.1076 0.1200 | error:0.0727 4.6098  lr:9.6366e-04
+Epoch 380: 13:22:39  loss:0.1088 0.1304 | error:0.0735 5.0076  lr:9.6269e-04
+Epoch 386: 13:35:10  loss:0.1045 0.1193 | error:0.0708 4.5854  lr:9.6212e-04 - save model
+Epoch 390: 13:43:35  loss:0.1135 0.1292 | error:0.0766 4.9630  lr:9.6173e-04
+Epoch 400: 14:04:33  loss:0.1094 0.1225 | error:0.0740 4.7032  lr:9.6077e-04
+Epoch 410: 14:25:29  loss:0.1096 0.1221 | error:0.0740 4.6898  lr:9.5981e-04
+Epoch 420: 14:46:21  loss:0.1081 0.1242 | error:0.0731 4.7749  lr:9.5885e-04
+Epoch 430: 15:07:18  loss:0.1066 0.1215 | error:0.0722 4.6660  lr:9.5789e-04
+Epoch 440: 15:28:10  loss:0.1060 0.1209 | error:0.0718 4.6463  lr:9.5693e-04
+Epoch 450: 15:49:04  loss:0.1070 0.1214 | error:0.0725 4.6622  lr:9.5598e-04
+Epoch 459: 16:07:51  loss:0.1108 0.1193 | error:0.0747 4.5828  lr:9.5512e-04 - save model
+Epoch 460: 16:09:55  loss:0.1079 0.1221 | error:0.0731 4.6937  lr:9.5502e-04
+Epoch 470: 16:30:47  loss:0.1064 0.1297 | error:0.0719 4.9920  lr:9.5406e-04
+Epoch 480: 16:51:40  loss:0.1077 0.1227 | error:0.0728 4.7148  lr:9.5311e-04
+Epoch 481: 16:53:45  loss:0.1059 0.1190 | error:0.0716 4.5740  lr:9.5302e-04 - save model
+Epoch 490: 17:12:35  loss:0.1060 0.1253 | error:0.0716 4.8094  lr:9.5216e-04
+Epoch 500: 17:33:32  loss:0.1050 0.1243 | error:0.0710 4.7800  lr:9.5121e-04
+Epoch 502: 17:38:24  loss:0.1045 0.1190 | error:0.0707 4.5722  lr:9.5102e-04 - save model
+Epoch 504: 17:43:20  loss:0.1047 0.1188 | error:0.0708 4.5617  lr:9.5083e-04 - save model
+Epoch 510: 18:01:09  loss:0.1031 0.1266 | error:0.0697 4.8809  lr:9.5025e-04
+Epoch 518: 18:20:11  loss:0.1039 0.1181 | error:0.0702 4.5350  lr:9.4949e-04 - save model
+Epoch 520: 18:25:04  loss:0.1080 0.1238 | error:0.0729 4.7628  lr:9.4930e-04
+Epoch 530: 18:49:30  loss:0.1051 0.1185 | error:0.0709 4.5547  lr:9.4835e-04
+Epoch 540: 19:13:55  loss:0.1044 0.1192 | error:0.0707 4.5736  lr:9.4741e-04
+Epoch 550: 19:38:20  loss:0.1048 0.1199 | error:0.0707 4.6086  lr:9.4646e-04
+Epoch 560: 20:01:30  loss:0.1038 0.1327 | error:0.0701 5.0893  lr:9.4551e-04
+Epoch 570: 20:22:24  loss:0.1054 0.1193 | error:0.0711 4.5837  lr:9.4457e-04
+Epoch 580: 20:43:18  loss:0.1082 0.1198 | error:0.0729 4.6037  lr:9.4362e-04
+Epoch 590: 21:04:11  loss:0.1035 0.1328 | error:0.0700 5.0975  lr:9.4268e-04
+Epoch 600: 21:25:15  loss:0.1028 0.1212 | error:0.0694 4.6589  lr:9.4174e-04
+Epoch 604: 21:33:38  loss:0.1055 0.1175 | error:0.0715 4.5115  lr:9.4136e-04 - save model
+Epoch 610: 21:46:09  loss:0.1027 0.1195 | error:0.0694 4.5888  lr:9.4079e-04
+Epoch 620: 22:07:06  loss:0.1036 0.1198 | error:0.0700 4.6048  lr:9.3985e-04
+Epoch 630: 22:28:03  loss:0.1106 0.1284 | error:0.0748 4.9276  lr:9.3891e-04
+Epoch 640: 22:49:01  loss:0.1079 0.1440 | error:0.0727 5.5280  lr:9.3797e-04
+Epoch 650: 23:09:53  loss:0.1034 0.1179 | error:0.0698 4.5266  lr:9.3704e-04
+Epoch 660: 23:30:56  loss:0.1030 0.1192 | error:0.0696 4.5787  lr:9.3610e-04
+Epoch 670: 23:51:54  loss:0.1138 0.1211 | error:0.0768 4.6533  lr:9.3516e-04
+Epoch 678: 1 day, 0:08:36  loss:0.1011 0.1173 | error:0.0683 4.5064  lr:9.3442e-04 - save model
+Epoch 679: 1 day, 0:10:41  loss:0.1026 0.1172 | error:0.0693 4.4993  lr:9.3432e-04 - save model
+Epoch 680: 1 day, 0:12:46  loss:0.1031 0.1176 | error:0.0696 4.5170  lr:9.3423e-04
+Epoch 690: 1 day, 0:33:40  loss:0.1046 0.1179 | error:0.0706 4.5281  lr:9.3329e-04
+Epoch 700: 1 day, 0:54:36  loss:0.1034 0.1200 | error:0.0698 4.6102  lr:9.3236e-04
+Epoch 710: 1 day, 1:15:31  loss:0.1030 0.1184 | error:0.0696 4.5473  lr:9.3143e-04
+Epoch 712: 1 day, 1:19:43  loss:0.1016 0.1163 | error:0.0688 4.4688  lr:9.3124e-04 - save model
+Epoch 720: 1 day, 1:36:29  loss:0.1038 0.1205 | error:0.0701 4.6301  lr:9.3050e-04
+Epoch 730: 1 day, 1:57:20  loss:0.1026 0.1182 | error:0.0693 4.5371  lr:9.2957e-04
+Epoch 740: 1 day, 2:18:13  loss:0.1018 0.1170 | error:0.0689 4.4947  lr:9.2864e-04
+Epoch 750: 1 day, 2:39:06  loss:0.1036 0.1181 | error:0.0700 4.5383  lr:9.2771e-04
+Epoch 760: 1 day, 2:59:53  loss:0.1045 0.1231 | error:0.0705 4.7247  lr:9.2678e-04
+Epoch 770: 1 day, 3:20:45  loss:0.1016 0.1180 | error:0.0688 4.5333  lr:9.2585e-04
+Epoch 780: 1 day, 3:41:48  loss:0.1062 0.1181 | error:0.0717 4.5385  lr:9.2493e-04
+Epoch 790: 1 day, 4:02:35  loss:0.1039 0.1176 | error:0.0702 4.5178  lr:9.2400e-04
+Epoch 800: 1 day, 4:23:22  loss:0.1042 0.1213 | error:0.0706 4.6580  lr:9.2308e-04
+Epoch 810: 1 day, 4:44:11  loss:0.1011 0.1196 | error:0.0683 4.5911  lr:9.2216e-04
+Epoch 820: 1 day, 5:05:03  loss:0.1037 0.1174 | error:0.0701 4.5078  lr:9.2123e-04
+Epoch 830: 1 day, 5:25:58  loss:0.1020 0.1168 | error:0.0689 4.4871  lr:9.2031e-04
+Epoch 840: 1 day, 5:46:52  loss:0.1052 0.1176 | error:0.0709 4.5155  lr:9.1939e-04
+Epoch 850: 1 day, 6:07:44  loss:0.1032 0.1176 | error:0.0697 4.5190  lr:9.1847e-04
+Epoch 860: 1 day, 6:28:36  loss:0.1023 0.1193 | error:0.0691 4.5814  lr:9.1755e-04
+Epoch 868: 1 day, 6:45:15  loss:0.1017 0.1163 | error:0.0687 4.4684  lr:9.1682e-04 - save model
+Epoch 870: 1 day, 6:49:26  loss:0.1031 0.1178 | error:0.0696 4.5260  lr:9.1664e-04
+Epoch 880: 1 day, 7:10:18  loss:0.1018 0.1222 | error:0.0687 4.6902  lr:9.1572e-04
+Epoch 889: 1 day, 7:29:05  loss:0.1007 0.1161 | error:0.0680 4.4595  lr:9.1490e-04 - save model
+Epoch 890: 1 day, 7:31:09  loss:0.1033 0.1197 | error:0.0698 4.5898  lr:9.1480e-04
+Epoch 900: 1 day, 7:52:00  loss:0.1004 0.1186 | error:0.0679 4.5563  lr:9.1389e-04
+Epoch 910: 1 day, 8:12:47  loss:0.1017 0.1164 | error:0.0687 4.4709  lr:9.1298e-04
+Epoch 920: 1 day, 8:33:37  loss:0.1040 0.1172 | error:0.0702 4.5007  lr:9.1206e-04
+Epoch 930: 1 day, 8:54:25  loss:0.1046 0.1172 | error:0.0705 4.5043  lr:9.1115e-04
+Epoch 940: 1 day, 9:15:26  loss:0.1026 0.1167 | error:0.0695 4.4810  lr:9.1024e-04
+Epoch 950: 1 day, 9:36:15  loss:0.1074 0.1173 | error:0.0724 4.5074  lr:9.0933e-04
+Epoch 960: 1 day, 9:57:08  loss:0.1006 0.1172 | error:0.0680 4.5006  lr:9.0842e-04
+Epoch 970: 1 day, 10:18:07  loss:0.1126 0.1238 | error:0.0758 4.7569  lr:9.0751e-04
+Epoch 980: 1 day, 10:39:02  loss:0.1037 0.1175 | error:0.0700 4.5096  lr:9.0660e-04
+Epoch 990: 1 day, 10:59:56  loss:0.1037 0.1177 | error:0.0700 4.5213  lr:9.0570e-04
+Epoch 996: 1 day, 11:12:27  loss:0.1015 0.1160 | error:0.0684 4.4558  lr:9.0515e-04 - save model
+
+GeoBi-GNN_Synthetic_train
+best error: 4.4557695388793945
+==========================================================================================
+
+--------------------Training end--------------------------
+
+Namespace(batch_size=1, beta1=0.9, beta2=0.999, data_type='Synthetic', filter_patch_count=100, flag='train', force_depth=False, last_epoch=None, loss_n='L1', loss_n_scale=1, loss_v='L1', loss_v_scale=1, lr=0.001, lr_decay=0.999, lr_sch='lmd', lr_step=[10], max_epoch=1000, model_name='GeoBi-GNN_Synthetic_model.pth', optimizer='adam', params_name='GeoBi-GNN_Synthetic_params.pth', pool_type='max', restore=0, restore_name='GeoBi-GNN_Synthetic_restore.pth', restore_time='2024-01-13-19-12-28', seed=30, sub_size=20000, wei_param=2, weight_decay=0)
+
+
+Infer train, sub_size:20000, 90 files ...
+
+---------- time:  8.1610 s
+---------- time:  5.8131 s
+angle1:  4.080972,  angle2:  3.934761,  faces: 345944,  time: 15.1084 s,  'armadillo_n1.obj'
+---------- time:  8.1077 s
+---------- time:  5.8484 s
+angle1:  5.317146,  angle2:  5.137211,  faces: 345944,  time: 15.0815 s,  'armadillo_n2.obj'
+---------- time:  8.0581 s
+---------- time:  5.8507 s
+angle1:  6.146358,  angle2:  5.934700,  faces: 345944,  time: 15.0323 s,  'armadillo_n3.obj'
+---------- time:  0.1373 s
+---------- time:  0.2763 s
+angle1:  1.837953,  angle2:  1.707451,  faces:  17550,  time:  0.4696 s,  'block_n1.obj'
+---------- time:  0.1271 s
+---------- time:  0.2669 s
+angle1:  2.224324,  angle2:  2.083015,  faces:  17550,  time:  0.4514 s,  'block_n2.obj'
+---------- time:  0.1257 s
+---------- time:  0.2334 s
+angle1:  2.629234,  angle2:  2.450338,  faces:  17550,  time:  0.4159 s,  'block_n3.obj'
+---------- time:  0.6020 s
+---------- time:  0.5648 s
+angle1:  2.836094,  angle2:  2.631531,  faces:  33630,  time:  1.2774 s,  'bumpy_torus_n1.obj'
+---------- time:  0.7222 s
+---------- time:  0.5439 s
+angle1:  3.641522,  angle2:  3.300422,  faces:  33630,  time:  1.3778 s,  'bumpy_torus_n2.obj'
+---------- time:  0.5983 s
+---------- time:  0.4667 s
+angle1:  4.273698,  angle2:  3.863551,  faces:  33630,  time:  1.1747 s,  'bumpy_torus_n3.obj'
+---------- time:  1.4908 s
+---------- time:  1.2083 s
+angle1:  4.043202,  angle2:  3.926507,  faces:  69537,  time:  2.9320 s,  'bunny_hi_n1.obj'
+---------- time:  1.4918 s
+---------- time:  1.2764 s
+angle1:  5.041663,  angle2:  4.890365,  faces:  69537,  time:  3.0010 s,  'bunny_hi_n2.obj'
+---------- time:  1.4870 s
+---------- time:  1.2508 s
+angle1:  5.693813,  angle2:  5.523389,  faces:  69537,  time:  2.9738 s,  'bunny_hi_n3.obj'
+---------- time:  2.2398 s
+---------- time:  1.7425 s
+angle1:  4.459973,  angle2:  4.274587,  faces: 100000,  time:  4.3214 s,  'carter100K_n1.obj'
+---------- time:  2.3672 s
+---------- time:  1.7337 s
+angle1:  5.371954,  angle2:  5.134024,  faces: 100000,  time:  4.4417 s,  'carter100K_n2.obj'
+---------- time:  2.2398 s
+---------- time:  2.0037 s
+angle1:  6.037604,  angle2:  5.767406,  faces: 100000,  time:  4.5841 s,  'carter100K_n3.obj'
+---------- time:  2.2292 s
+---------- time:  1.7066 s
+angle1:  4.065035,  angle2:  3.925123,  faces: 100000,  time:  4.2688 s,  'child_n1.obj'
+---------- time:  2.2264 s
+---------- time:  1.7881 s
+angle1:  5.223731,  angle2:  5.063174,  faces: 100000,  time:  4.3538 s,  'child_n2.obj'
+---------- time:  2.2200 s
+---------- time:  1.7500 s
+angle1:  5.992122,  angle2:  5.798573,  faces: 100000,  time:  4.3063 s,  'child_n3.obj'
+---------- time:  2.1220 s
+---------- time:  1.5633 s
+angle1:  4.744817,  angle2:  4.579307,  faces: 100000,  time:  4.0273 s,  'chinese_lion_n1.obj'
+---------- time:  2.2398 s
+---------- time:  1.7542 s
+angle1:  6.022901,  angle2:  5.818667,  faces: 100000,  time:  4.3380 s,  'chinese_lion_n2.obj'
+---------- time:  2.1065 s
+---------- time:  1.5967 s
+angle1:  6.875010,  angle2:  6.622763,  faces: 100000,  time:  4.0461 s,  'chinese_lion_n3.obj'
+---------- time:  0.0993 s
+---------- time:  0.1445 s
+angle1:  0.638507,  angle2:  0.498248,  faces:  12288,  time:  0.2819 s,  'cube_n1.obj'
+---------- time:  0.0880 s
+---------- time:  0.1476 s
+angle1:  0.891268,  angle2:  0.753761,  faces:  12288,  time:  0.2742 s,  'cube_n2.obj'
+---------- time:  0.0870 s
+---------- time:  0.1531 s
+angle1:  1.233937,  angle2:  1.100979,  faces:  12288,  time:  0.2790 s,  'cube_n3.obj'
+---------- time:  0.4131 s
+---------- time:  0.3428 s
+angle1:  5.819898,  angle2:  5.793119,  faces:  24576,  time:  0.8359 s,  'eight_n1.obj'
+---------- time:  0.4064 s
+---------- time:  0.3302 s
+angle1:  6.038249,  angle2:  5.992189,  faces:  24576,  time:  0.8172 s,  'eight_n2.obj'
+---------- time:  0.4047 s
+---------- time:  0.3186 s
+angle1:  6.156877,  angle2:  6.091791,  faces:  24576,  time:  0.8041 s,  'eight_n3.obj'
+---------- time:  2.3930 s
+---------- time:  1.7800 s
+angle1:  6.105567,  angle2:  5.984760,  faces: 100000,  time:  4.5153 s,  'eros100K_n1.obj'
+---------- time:  2.2441 s
+---------- time:  1.7502 s
+angle1:  7.235614,  angle2:  7.078499,  faces: 100000,  time:  4.3337 s,  'eros100K_n2.obj'
+---------- time:  2.4997 s
+---------- time:  1.8559 s
+angle1:  7.811074,  angle2:  7.618759,  faces: 100000,  time:  4.6984 s,  'eros100K_n3.obj'
+---------- time:  0.4495 s
+---------- time:  0.3338 s
+angle1:  2.596039,  angle2:  2.377551,  faces:  27954,  time:  0.8774 s,  'fertility_n1.obj'
+---------- time:  0.4407 s
+---------- time:  0.3399 s
+angle1:  3.349547,  angle2:  3.105052,  faces:  27954,  time:  0.8750 s,  'fertility_n2.obj'
+---------- time:  0.4456 s
+---------- time:  0.3260 s
+angle1:  3.983915,  angle2:  3.692045,  faces:  27954,  time:  0.8678 s,  'fertility_n3.obj'
+---------- time:  4.3658 s
+---------- time:  3.3602 s
+angle1:  4.018840,  angle2:  3.769806,  faces: 171112,  time:  8.2940 s,  'gargoyle_n1.obj'
+---------- time:  4.2461 s
+---------- time:  3.1238 s
+angle1:  5.558880,  angle2:  5.229894,  faces: 171112,  time:  7.9402 s,  'gargoyle_n2.obj'
+---------- time:  4.4747 s
+---------- time:  3.3785 s
+angle1:  6.628564,  angle2:  6.246950,  faces: 171112,  time:  8.4274 s,  'gargoyle_n3.obj'
+---------- time:  0.1027 s
+---------- time:  0.1574 s
+angle1:  1.496707,  angle2:  1.216218,  faces:  13312,  time:  0.3041 s,  'genus3_n1.obj'
+---------- time:  0.0953 s
+---------- time:  0.1633 s
+angle1:  1.966173,  angle2:  1.599390,  faces:  13312,  time:  0.3029 s,  'genus3_n2.obj'
+---------- time:  0.0969 s
+---------- time:  0.1686 s
+angle1:  2.463653,  angle2:  2.071088,  faces:  13312,  time:  0.3082 s,  'genus3_n3.obj'
+---------- time:  1.2201 s
+---------- time:  1.0211 s
+angle1:  5.195228,  angle2:  5.057749,  faces:  68580,  time:  2.4647 s,  'grayloc_n1.obj'
+---------- time:  1.3467 s
+---------- time:  1.1099 s
+angle1:  6.331584,  angle2:  6.193232,  faces:  68580,  time:  2.6810 s,  'grayloc_n2.obj'
+---------- time:  1.3491 s
+---------- time:  1.0650 s
+angle1:  6.914495,  angle2:  6.818359,  faces:  68580,  time:  2.6402 s,  'grayloc_n3.obj'
+---------- time:  0.7872 s
+---------- time:  0.5698 s
+angle1:  1.508371,  angle2:  1.374242,  faces:  41808,  time:  1.4991 s,  'joint_n1.obj'
+---------- time:  0.7827 s
+---------- time:  0.5722 s
+angle1:  1.744065,  angle2:  1.584276,  faces:  41808,  time:  1.4945 s,  'joint_n2.obj'
+---------- time:  0.7816 s
+---------- time:  0.5691 s
+angle1:  2.013975,  angle2:  1.827934,  faces:  41808,  time:  1.4892 s,  'joint_n3.obj'
+---------- time:  0.9823 s
+---------- time:  0.7033 s
+angle1:  2.111017,  angle2:  1.983966,  faces:  49912,  time:  1.8524 s,  'kitten_n1.obj'
+---------- time:  0.9785 s
+---------- time:  0.7296 s
+angle1:  2.525503,  angle2:  2.357125,  faces:  49912,  time:  1.8751 s,  'kitten_n2.obj'
+---------- time:  0.9771 s
+---------- time:  0.7302 s
+angle1:  2.802412,  angle2:  2.607666,  faces:  49912,  time:  1.8720 s,  'kitten_n3.obj'
+---------- time: 15.5777 s
+---------- time: 11.0642 s
+angle1:  3.137467,  angle2:  3.041172,  faces: 566465,  time: 28.5201 s,  'Merlion_n1.obj'
+---------- time: 15.4401 s
+---------- time: 10.9284 s
+angle1:  3.960340,  angle2:  3.841246,  faces: 566465,  time: 28.2411 s,  'Merlion_n2.obj'
+---------- time: 15.2582 s
+---------- time: 10.8000 s
+angle1:  4.692461,  angle2:  4.541925,  faces: 566465,  time: 27.9290 s,  'Merlion_n3.obj'
+---------- time:  1.9601 s
+---------- time:  1.6978 s
+angle1:  3.448251,  angle2:  3.320494,  faces:  99994,  time:  3.9920 s,  'nicolo_n1.obj'
+---------- time:  1.9846 s
+---------- time:  1.6347 s
+angle1:  4.116954,  angle2:  3.948450,  faces:  99994,  time:  3.9541 s,  'nicolo_n2.obj'
+---------- time:  1.9867 s
+---------- time:  1.5443 s
+angle1:  4.579175,  angle2:  4.384415,  faces:  99994,  time:  3.8669 s,  'nicolo_n3.obj'
+---------- time:  0.0758 s
+---------- time:  0.1194 s
+angle1:  1.693455,  angle2:  1.402903,  faces:   8530,  time:  0.2246 s,  'part_Lp_n1.obj'
+---------- time:  0.0667 s
+---------- time:  0.1283 s
+angle1:  2.291022,  angle2:  2.069733,  faces:   8530,  time:  0.2251 s,  'part_Lp_n2.obj'
+---------- time:  0.0712 s
+---------- time:  0.1299 s
+angle1:  2.915481,  angle2:  2.608789,  faces:   8530,  time:  0.2312 s,  'part_Lp_n3.obj'
+---------- time:  0.8998 s
+---------- time:  0.7282 s
+angle1:  0.867585,  angle2:  0.829611,  faces:  36550,  time:  1.7561 s,  'plane-sphere_n1.obj'
+---------- time:  0.8774 s
+---------- time:  0.6084 s
+angle1:  1.110420,  angle2:  1.065149,  faces:  36550,  time:  1.6086 s,  'plane-sphere_n2.obj'
+---------- time:  0.8794 s
+---------- time:  0.6118 s
+angle1:  1.363723,  angle2:  1.301799,  faces:  36550,  time:  1.6144 s,  'plane-sphere_n3.obj'
+---------- time:  2.2407 s
+---------- time:  1.6781 s
+angle1:  2.779977,  angle2:  2.549937,  faces: 100000,  time:  4.2596 s,  'pulley_n1.obj'
+---------- time:  2.2374 s
+---------- time:  1.6601 s
+angle1:  3.519588,  angle2:  3.209073,  faces: 100000,  time:  4.2396 s,  'pulley_n2.obj'
+---------- time:  2.3626 s
+---------- time:  1.9475 s
+angle1:  4.137312,  angle2:  3.770353,  faces: 100000,  time:  4.6544 s,  'pulley_n3.obj'
+---------- time:  0.4418 s
+---------- time:  0.3075 s
+angle1:  0.516359,  angle2:  0.403043,  faces:  24576,  time:  0.8287 s,  'Pyramid_n1.obj'
+---------- time:  0.4272 s
+---------- time:  0.3199 s
+angle1:  0.757071,  angle2:  0.634463,  faces:  24576,  time:  0.8255 s,  'Pyramid_n2.obj'
+---------- time:  0.4317 s
+---------- time:  0.3127 s
+angle1:  1.001101,  angle2:  0.880295,  faces:  24576,  time:  0.8225 s,  'Pyramid_n3.obj'
+---------- time:  2.3744 s
+---------- time:  1.8185 s
+angle1:  2.791811,  angle2:  2.605624,  faces: 100000,  time:  4.5362 s,  'rolling_stage_n1.obj'
+---------- time:  2.2431 s
+---------- time:  1.7672 s
+angle1:  3.372122,  angle2:  3.123916,  faces: 100000,  time:  4.3540 s,  'rolling_stage_n2.obj'
+---------- time:  2.2474 s
+---------- time:  1.8752 s
+angle1:  3.826811,  angle2:  3.548702,  faces: 100000,  time:  4.4634 s,  'rolling_stage_n3.obj'
+---------- time:  1.1476 s
+---------- time:  0.9039 s
+angle1:  2.597250,  angle2:  2.478524,  faces:  54300,  time:  2.2333 s,  'screwdriver_n1.obj'
+---------- time:  1.1324 s
+---------- time:  0.9061 s
+angle1:  3.123559,  angle2:  2.966280,  faces:  54300,  time:  2.2202 s,  'screwdriver_n2.obj'
+---------- time:  1.0107 s
+---------- time:  0.7385 s
+angle1:  3.667642,  angle2:  3.497611,  faces:  54300,  time:  1.9312 s,  'screwdriver_n3.obj'
+---------- time:  0.3992 s
+---------- time:  0.3101 s
+angle1:  3.340050,  angle2:  3.070051,  faces:  20882,  time:  0.7779 s,  'sharp_sphere_n1.obj'
+---------- time:  0.3908 s
+---------- time:  0.3183 s
+angle1:  4.360996,  angle2:  3.968137,  faces:  20882,  time:  0.7785 s,  'sharp_sphere_n2.obj'
+---------- time:  0.3918 s
+---------- time:  0.3271 s
+angle1:  5.282844,  angle2:  5.040833,  faces:  20882,  time:  0.7870 s,  'sharp_sphere_n3.obj'
+---------- time:  0.1027 s
+---------- time:  0.1577 s
+angle1:  0.765385,  angle2:  0.610610,  faces:  12436,  time:  0.3005 s,  'smooth-feature_n1.obj'
+---------- time:  0.0897 s
+---------- time:  0.1556 s
+angle1:  1.024274,  angle2:  0.865562,  faces:  12436,  time:  0.2849 s,  'smooth-feature_n2.obj'
+---------- time:  0.0903 s
+---------- time:  0.1500 s
+angle1:  1.359758,  angle2:  1.214813,  faces:  12436,  time:  0.2801 s,  'smooth-feature_n3.obj'
+---------- time:  0.0668 s
+---------- time:  0.1110 s
+angle1:  1.898912,  angle2:  1.859741,  faces:   8192,  time:  0.2053 s,  'sphere_n1.obj'
+---------- time:  0.0621 s
+---------- time:  0.1131 s
+angle1:  1.998790,  angle2:  1.924603,  faces:   8192,  time:  0.2015 s,  'sphere_n2.obj'
+---------- time:  0.0625 s
+---------- time:  0.1129 s
+angle1:  2.151167,  angle2:  2.050643,  faces:   8192,  time:  0.2014 s,  'sphere_n3.obj'
+---------- time:  0.1182 s
+---------- time:  0.1981 s
+angle1:  1.160176,  angle2:  0.974674,  faces:  15310,  time:  0.3677 s,  'star_n1.obj'
+---------- time:  0.1145 s
+---------- time:  0.1984 s
+angle1:  1.452313,  angle2:  1.232027,  faces:  15310,  time:  0.3659 s,  'star_n2.obj'
+---------- time:  0.1147 s
+---------- time:  0.1995 s
+angle1:  1.711050,  angle2:  1.473322,  faces:  15310,  time:  0.3664 s,  'star_n3.obj'
+---------- time:  0.1031 s
+---------- time:  0.1620 s
+angle1:  3.212847,  angle2:  3.173990,  faces:  10384,  time:  0.3001 s,  'trim-star_n1.obj'
+---------- time:  0.0787 s
+---------- time:  0.1643 s
+angle1:  4.240084,  angle2:  4.046753,  faces:  10384,  time:  0.2781 s,  'trim-star_n2.obj'
+---------- time:  0.0792 s
+---------- time:  0.1645 s
+angle1:  5.006191,  angle2:  4.796172,  faces:  10384,  time:  0.2777 s,  'trim-star_n3.obj'
+---------- time:  2.3264 s
+---------- time:  1.8595 s
+angle1:  1.998072,  angle2:  1.884346,  faces: 114040,  time:  4.5658 s,  'turbine_Lp_n1.obj'
+---------- time:  2.3192 s
+---------- time:  1.6640 s
+angle1:  2.565443,  angle2:  2.435376,  faces: 114040,  time:  4.3684 s,  'turbine_Lp_n2.obj'
+---------- time:  2.0615 s
+---------- time:  1.5522 s
+angle1:  3.066784,  angle2:  2.926576,  faces: 114040,  time:  3.9986 s,  'turbine_Lp_n3.obj'
+
+Num_face: 7343586,  angle_mean1: 4.282556,  angle_mean2: 4.104110
+
+--- end ---

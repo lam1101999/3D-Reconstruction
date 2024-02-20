@@ -1,0 +1,159 @@
+==========================================================================================
+Load processed information!
+Load processed information!
+train_dataset: 356 samples
+Testing set: 916 samples
+Total parameters generator:  939128
+Total parameters discriminator:  137046
+cuda
+Epoch   0:  0:05:46  loss:0.2465 1.3259 | error:0.1662 56.2616  lr:9.9990e-04 - save model
+Epoch   1:  0:11:27  loss:0.2315 0.4172 | error:0.1563 16.5868  lr:9.9980e-04 - save model
+Epoch   2:  0:17:08  loss:0.2336 0.2701 | error:0.1580 10.4406  lr:9.9970e-04 - save model
+Epoch   3:  0:22:50  loss:0.2194 0.2227 | error:0.1479 8.5602  lr:9.9960e-04 - save model
+Epoch   4:  0:28:32  loss:0.2163 0.2047 | error:0.1460 7.8721  lr:9.9950e-04 - save model
+Epoch   6:  0:39:55  loss:0.2258 0.1930 | error:0.1518 7.4565  lr:9.9930e-04 - save model
+Epoch   9:  0:57:00  loss:0.1963 0.1854 | error:0.1326 7.1114  lr:9.9900e-04 - save model
+Epoch  10:  1:02:40  loss:0.2053 0.1793 | error:0.1381 6.8904  lr:9.9890e-04 - save model
+Epoch  11:  1:08:22  loss:0.1941 0.1770 | error:0.1310 6.8211  lr:9.9880e-04 - save model
+Epoch  18:  1:48:21  loss:0.1766 0.1719 | error:0.1192 6.6487  lr:9.9810e-04 - save model
+Epoch  19:  1:54:03  loss:0.1705 0.1648 | error:0.1152 6.3287  lr:9.9800e-04 - save model
+Epoch  20:  1:59:43  loss:0.1724 0.2204 | error:0.1161 8.4323  lr:9.9790e-04
+Epoch  23:  2:16:47  loss:0.1601 0.1584 | error:0.1083 6.0869  lr:9.9760e-04 - save model
+Epoch  24:  2:22:34  loss:0.1564 0.1529 | error:0.1059 5.8993  lr:9.9750e-04 - save model
+Epoch  30:  2:56:47  loss:0.1502 0.1536 | error:0.1019 5.8995  lr:9.9690e-04
+Epoch  33:  3:13:48  loss:0.1471 0.1468 | error:0.0994 5.6301  lr:9.9660e-04 - save model
+Epoch  34:  3:19:29  loss:0.1541 0.1417 | error:0.1042 5.4489  lr:9.9650e-04 - save model
+Epoch  40:  3:53:44  loss:0.1477 0.1534 | error:0.1001 5.9023  lr:9.9591e-04
+Epoch  44:  4:16:44  loss:0.1379 0.1415 | error:0.0933 5.4432  lr:9.9551e-04 - save model
+Epoch  47:  4:34:02  loss:0.1393 0.1388 | error:0.0946 5.3386  lr:9.9521e-04 - save model
+Epoch  49:  4:45:34  loss:0.1391 0.1385 | error:0.0943 5.3291  lr:9.9501e-04 - save model
+Epoch  50:  4:51:18  loss:0.1362 0.1643 | error:0.0923 6.3837  lr:9.9491e-04
+Epoch  52:  5:02:49  loss:0.1356 0.1348 | error:0.0919 5.1891  lr:9.9471e-04 - save model
+Epoch  60:  5:49:01  loss:0.1406 0.1530 | error:0.0948 5.8946  lr:9.9392e-04
+Epoch  70:  6:45:59  loss:0.1311 0.1383 | error:0.0889 5.3082  lr:9.9292e-04
+Epoch  80:  7:42:33  loss:0.1299 0.1320 | error:0.0880 5.0756  lr:9.9193e-04 - save model
+Epoch  83:  7:59:34  loss:0.1311 0.1312 | error:0.0885 5.0432  lr:9.9163e-04 - save model
+Epoch  87:  8:22:16  loss:0.1316 0.1300 | error:0.0890 5.0012  lr:9.9123e-04 - save model
+Epoch  90:  8:39:21  loss:0.1270 0.1475 | error:0.0859 5.6544  lr:9.9094e-04
+Epoch 100:  9:36:13  loss:0.1314 0.1502 | error:0.0887 5.7772  lr:9.8995e-04
+Epoch 110: 10:32:54  loss:0.1309 0.1598 | error:0.0889 6.1163  lr:9.8896e-04
+Epoch 120: 11:29:42  loss:0.1234 0.1283 | error:0.0836 4.9336  lr:9.8797e-04 - save model
+Epoch 127: 12:09:26  loss:0.1231 0.1282 | error:0.0834 4.9299  lr:9.8728e-04 - save model
+Epoch 130: 12:26:28  loss:0.1218 0.1633 | error:0.0823 6.2438  lr:9.8698e-04
+Epoch 140: 13:23:07  loss:0.1220 0.1329 | error:0.0826 5.1018  lr:9.8599e-04
+Epoch 147: 14:03:07  loss:0.1201 0.1283 | error:0.0812 4.9296  lr:9.8530e-04 - save model
+Epoch 150: 14:20:14  loss:0.1231 0.1852 | error:0.0832 7.0894  lr:9.8501e-04
+Epoch 151: 14:25:56  loss:0.1203 0.1278 | error:0.0813 4.9146  lr:9.8491e-04 - save model
+Epoch 158: 15:05:50  loss:0.1178 0.1273 | error:0.0798 4.8919  lr:9.8422e-04 - save model
+Epoch 160: 15:17:15  loss:0.1198 0.1279 | error:0.0812 4.9153  lr:9.8402e-04
+Epoch 162: 15:28:39  loss:0.1192 0.1267 | error:0.0807 4.8675  lr:9.8382e-04 - save model
+Epoch 165: 15:45:45  loss:0.1208 0.1259 | error:0.0817 4.8354  lr:9.8353e-04 - save model
+Epoch 170: 16:14:16  loss:0.1231 0.1483 | error:0.0832 5.7601  lr:9.8304e-04
+Epoch 180: 17:11:20  loss:0.1203 0.1320 | error:0.0814 5.0820  lr:9.8205e-04
+Epoch 190: 18:09:00  loss:0.1166 0.1258 | error:0.0790 4.8377  lr:9.8107e-04
+Epoch 194: 18:31:40  loss:0.1157 0.1244 | error:0.0783 4.7791  lr:9.8068e-04 - save model
+Epoch 200: 19:05:41  loss:0.1138 0.1280 | error:0.0770 4.9226  lr:9.8009e-04
+Epoch 201: 19:11:20  loss:0.1170 0.1242 | error:0.0791 4.7741  lr:9.7999e-04 - save model
+Epoch 210: 20:02:16  loss:0.1165 0.1246 | error:0.0788 4.7892  lr:9.7911e-04
+Epoch 220: 21:47:49  loss:0.1122 0.1321 | error:0.0759 5.0730  lr:9.7813e-04
+Epoch 227: 23:01:55  loss:0.1130 0.1242 | error:0.0764 4.7710  lr:9.7745e-04 - save model
+Epoch 230: 23:34:17  loss:0.1145 0.1251 | error:0.0775 4.8055  lr:9.7715e-04
+Epoch 236: 1 day, 0:38:44  loss:0.1099 0.1237 | error:0.0743 4.7529  lr:9.7657e-04 - save model
+Epoch 240: 1 day, 1:21:15  loss:0.1144 0.1274 | error:0.0772 4.8933  lr:9.7618e-04
+Epoch 241: 1 day, 1:27:09  loss:0.1142 0.1234 | error:0.0769 4.7434  lr:9.7608e-04 - save model
+Epoch 244: 1 day, 1:44:22  loss:0.1100 0.1233 | error:0.0744 4.7365  lr:9.7579e-04 - save model
+Epoch 246: 1 day, 1:55:50  loss:0.1108 0.1227 | error:0.0748 4.7162  lr:9.7559e-04 - save model
+Epoch 249: 1 day, 2:13:05  loss:0.1090 0.1223 | error:0.0738 4.6978  lr:9.7530e-04 - save model
+Epoch 250: 1 day, 2:18:49  loss:0.1115 0.1241 | error:0.0754 4.7672  lr:9.7520e-04
+Epoch 260: 1 day, 3:18:33  loss:0.1104 0.1376 | error:0.0745 5.2930  lr:9.7422e-04
+Epoch 269: 1 day, 4:14:38  loss:0.1101 0.1220 | error:0.0743 4.6863  lr:9.7335e-04 - save model
+Epoch 270: 1 day, 4:20:51  loss:0.1097 0.1238 | error:0.0742 4.7564  lr:9.7325e-04
+Epoch 280: 1 day, 5:23:10  loss:0.1087 0.1229 | error:0.0734 4.7230  lr:9.7228e-04
+Epoch 290: 1 day, 6:25:27  loss:0.1084 0.1290 | error:0.0733 4.9531  lr:9.7131e-04
+Epoch 300: 1 day, 7:27:44  loss:0.1052 0.1256 | error:0.0709 4.8244  lr:9.7033e-04
+Epoch 307: 1 day, 8:11:19  loss:0.1056 0.1215 | error:0.0713 4.6700  lr:9.6965e-04 - save model
+Epoch 310: 1 day, 8:29:59  loss:0.1104 0.1384 | error:0.0744 5.2975  lr:9.6936e-04
+Epoch 320: 1 day, 9:32:18  loss:0.1071 0.1266 | error:0.0723 4.8565  lr:9.6839e-04
+Epoch 322: 1 day, 9:44:45  loss:0.1066 0.1213 | error:0.0719 4.6583  lr:9.6820e-04 - save model
+Epoch 330: 1 day, 10:34:37  loss:0.1041 0.1215 | error:0.0702 4.6698  lr:9.6743e-04
+Epoch 337: 1 day, 11:18:15  loss:0.1026 0.1199 | error:0.0694 4.6070  lr:9.6675e-04 - save model
+Epoch 340: 1 day, 11:36:56  loss:0.1058 0.1252 | error:0.0715 4.8105  lr:9.6646e-04
+Epoch 346: 1 day, 12:14:17  loss:0.1024 0.1198 | error:0.0692 4.6039  lr:9.6588e-04 - save model
+Epoch 350: 1 day, 12:39:12  loss:0.1037 0.1220 | error:0.0698 4.6954  lr:9.6549e-04
+Epoch 360: 1 day, 13:41:33  loss:0.1041 0.1262 | error:0.0704 4.8492  lr:9.6453e-04
+Epoch 361: 1 day, 13:47:47  loss:0.1006 0.1193 | error:0.0680 4.5816  lr:9.6443e-04 - save model
+Epoch 370: 1 day, 14:43:39  loss:0.1041 0.1360 | error:0.0703 5.2137  lr:9.6356e-04
+Epoch 380: 1 day, 15:45:13  loss:0.1027 0.1202 | error:0.0695 4.6176  lr:9.6260e-04
+Epoch 388: 1 day, 16:31:10  loss:0.1022 0.1188 | error:0.0688 4.5620  lr:9.6183e-04 - save model
+==========================================================================================
+Load processed information!
+Load processed information!
+train_dataset: 356 samples
+Testing set: 916 samples
+Total parameters generator:  939128
+Total parameters discriminator:  137046
+cuda
+Epoch 390:  0:14:22  loss:0.1013 0.1212 | error:0.0684 4.6569  lr:9.9980e-04
+Epoch 400:  1:16:05  loss:0.0998 0.1213 | error:0.0675 4.6557  lr:9.9880e-04
+Epoch 410:  2:04:02  loss:0.1000 0.1198 | error:0.0677 4.6000  lr:9.9780e-04
+Epoch 420:  2:51:54  loss:0.0975 0.1214 | error:0.0658 4.6759  lr:9.9680e-04
+Epoch 430:  3:39:49  loss:0.0981 0.1185 | error:0.0662 4.5541  lr:9.9581e-04 - save model
+Epoch 434:  3:58:59  loss:0.0979 0.1184 | error:0.0661 4.5431  lr:9.9541e-04 - save model
+Epoch 440:  4:27:44  loss:0.1009 0.1203 | error:0.0681 4.6220  lr:9.9481e-04
+Epoch 446:  4:56:29  loss:0.1000 0.1177 | error:0.0676 4.5208  lr:9.9421e-04 - save model
+Epoch 450:  5:15:41  loss:0.0996 0.1179 | error:0.0672 4.5291  lr:9.9382e-04
+Epoch 460:  6:03:40  loss:0.0986 0.1192 | error:0.0667 4.5764  lr:9.9282e-04
+Epoch 470:  6:51:37  loss:0.0962 0.1179 | error:0.0650 4.5294  lr:9.9183e-04
+Epoch 480:  7:39:40  loss:0.0970 0.1221 | error:0.0655 4.6956  lr:9.9084e-04
+Epoch 490:  8:27:35  loss:0.0948 0.1172 | error:0.0639 4.5011  lr:9.8985e-04 - save model
+Epoch 500:  9:15:29  loss:0.0985 0.1192 | error:0.0665 4.5820  lr:9.8886e-04
+Epoch 510: 10:03:20  loss:0.0965 0.1222 | error:0.0652 4.6917  lr:9.8787e-04
+Epoch 520: 10:51:13  loss:0.0996 0.1209 | error:0.0672 4.6485  lr:9.8688e-04
+Epoch 530: 11:39:03  loss:0.0958 0.1196 | error:0.0647 4.5925  lr:9.8589e-04
+Epoch 532: 11:48:34  loss:0.0960 0.1169 | error:0.0649 4.4894  lr:9.8570e-04 - save model
+Epoch 540: 12:26:51  loss:0.1000 0.1172 | error:0.0675 4.5020  lr:9.8491e-04
+Epoch 543: 12:41:12  loss:0.0950 0.1158 | error:0.0643 4.4468  lr:9.8461e-04 - save model
+Epoch 550: 13:14:53  loss:0.1119 0.1256 | error:0.0756 4.8231  lr:9.8392e-04
+Epoch 560: 14:02:48  loss:0.0965 0.1277 | error:0.0652 4.8925  lr:9.8294e-04
+Epoch 570: 14:50:44  loss:0.0977 0.1186 | error:0.0660 4.5577  lr:9.8196e-04
+Epoch 580: 15:38:42  loss:0.0962 0.1175 | error:0.0649 4.5142  lr:9.8097e-04
+Epoch 590: 16:26:37  loss:0.0988 0.1220 | error:0.0667 4.6853  lr:9.7999e-04
+Epoch 600: 17:14:33  loss:0.0964 0.1244 | error:0.0650 4.7838  lr:9.7901e-04
+Epoch 610: 18:02:30  loss:0.0932 0.1163 | error:0.0630 4.4681  lr:9.7803e-04
+Epoch 620: 18:50:28  loss:0.0942 0.1210 | error:0.0636 4.6445  lr:9.7706e-04
+Epoch 627: 19:24:00  loss:0.0937 0.1156 | error:0.0633 4.4400  lr:9.7637e-04 - save model
+Epoch 630: 19:38:23  loss:0.0968 0.1171 | error:0.0654 4.4984  lr:9.7608e-04
+Epoch 640: 20:26:22  loss:0.0979 0.1180 | error:0.0662 4.5315  lr:9.7510e-04
+Epoch 650: 21:14:16  loss:0.0942 0.1159 | error:0.0636 4.4546  lr:9.7413e-04
+Epoch 660: 22:02:10  loss:0.0963 0.1197 | error:0.0651 4.5925  lr:9.7315e-04
+Epoch 670: 22:50:05  loss:0.0985 0.1180 | error:0.0665 4.5291  lr:9.7218e-04
+Epoch 680: 23:38:03  loss:0.0960 0.1179 | error:0.0647 4.5306  lr:9.7121e-04
+Epoch 690: 1 day, 0:26:23  loss:0.0978 0.1169 | error:0.0660 4.4892  lr:9.7024e-04
+Epoch 700: 1 day, 1:14:19  loss:0.0924 0.1154 | error:0.0624 4.4351  lr:9.6927e-04 - save model
+Epoch 710:  0:54:04  loss:0.0938 0.1171 | error:0.0633 4.4962  lr:9.9900e-04
+Epoch 720:  1:47:45  loss:0.0962 0.1290 | error:0.0650 4.9488  lr:9.9800e-04
+Epoch 730:  2:41:24  loss:0.0950 0.1186 | error:0.0640 4.5591  lr:9.9700e-04
+Epoch 732:  2:52:08  loss:0.0942 0.1151 | error:0.0636 4.4211  lr:9.9680e-04 - save model
+Epoch 740:  3:35:03  loss:0.0938 0.1154 | error:0.0634 4.4322  lr:9.9601e-04
+Epoch 750:  4:28:43  loss:0.0964 0.1167 | error:0.0650 4.4827  lr:9.9501e-04
+Epoch 760:  5:22:23  loss:0.0941 0.1168 | error:0.0634 4.4871  lr:9.9401e-04
+Epoch 770:  6:16:03  loss:0.0966 0.1293 | error:0.0652 4.9536  lr:9.9302e-04
+Epoch 780:  7:09:57  loss:0.0959 0.1307 | error:0.0646 5.0077  lr:9.9203e-04
+Epoch 790:  8:04:21  loss:0.0954 0.1171 | error:0.0643 4.4986  lr:9.9104e-04
+Epoch 800:  8:58:49  loss:0.0969 0.1168 | error:0.0653 4.4889  lr:9.9004e-04
+Epoch 808:  9:42:23  loss:0.0924 0.1147 | error:0.0623 4.4025  lr:9.8925e-04 - save model
+Epoch 810:  9:53:16  loss:0.1024 0.1197 | error:0.0691 4.6051  lr:9.8905e-04
+Epoch 820: 10:47:50  loss:0.0942 0.1158 | error:0.0637 4.4496  lr:9.8807e-04
+Epoch 830: 11:42:18  loss:0.0954 0.1166 | error:0.0643 4.4779  lr:9.8708e-04
+Epoch 840: 12:36:45  loss:0.0930 0.1191 | error:0.0629 4.5723  lr:9.8609e-04
+Epoch 850: 13:31:11  loss:0.0943 0.1210 | error:0.0637 4.6467  lr:9.8510e-04
+Epoch 860: 14:25:40  loss:0.0951 0.1201 | error:0.0642 4.6138  lr:9.8412e-04
+Epoch 870: 15:20:06  loss:0.0952 0.1163 | error:0.0641 4.4643  lr:9.8314e-04
+Epoch 880: 16:14:37  loss:0.0945 0.1155 | error:0.0638 4.4317  lr:9.8215e-04
+Epoch 885: 16:41:51  loss:0.0918 0.1144 | error:0.0619 4.3926  lr:9.8166e-04 - save model
+Epoch 890: 17:09:03  loss:0.0957 0.1169 | error:0.0646 4.4919  lr:9.8117e-04
+Epoch 900: 18:03:29  loss:0.0956 0.1162 | error:0.0643 4.4647  lr:9.8019e-04
+Epoch 910: 18:57:57  loss:0.0938 0.1158 | error:0.0634 4.4471  lr:9.7921e-04
+Epoch 920: 19:52:24  loss:0.0929 0.1145 | error:0.0627 4.3976  lr:9.7823e-04
+Epoch 930: 20:47:11  loss:0.0950 0.1175 | error:0.0641 4.5114  lr:9.7725e-04
+Epoch 937: 21:25:17  loss:0.0932 0.1143 | error:0.0628 4.3903  lr:9.7657e-04 - save model
