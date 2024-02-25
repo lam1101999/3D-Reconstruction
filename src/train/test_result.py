@@ -3,12 +3,15 @@ import os
 import sys
 import glob
 import argparse
-from datetime import datetime
 import numpy as np
 import openmesh as om
 import torch
 import data_utils
+from datetime import datetime
+from typing import Union
 from dataset import DualDataset
+
+from loss import error_n, error_v
 
 
 CODE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -18,12 +21,38 @@ IS_DEBUG = getattr(sys, 'gettrace', None) is not None and sys.gettrace()
 
 
 def predict_one_submesh(net, device, dual_data):
+    """
+    A function that predicts one submesh using the given neural network and input data.
+
+    Args:
+        net: The neural network model.
+        device: The device on which to run the prediction.
+        dual_data: The input data for the prediction.
+
+    Returns:
+        vert_p: Predicted vertices.
+        norm_p: Predicted normals.
+    """
     with torch.no_grad():
         dual_data = [d.to(device) for d in dual_data]
         vert_p, norm_p, alpha = net(dual_data)
         return vert_p, norm_p
 
-def inference(filename, net, device, sub_size, data_type=None):
+def inference(filename, net, device:Union[str,torch.device]="cpu", sub_size=20000, data_type=None):
+    """
+    Perform inference on a given mesh using the provided neural network.
+
+    Args:
+        filename (str): The file path of the mesh to be processed.
+        net: The neural network model to be used for inference.
+        device: The device on which the inference will be performed.
+        sub_size: The size of the submesh for processing.
+        data_type (optional): The type of data used for post-processing.
+
+    Returns:
+        om.TriMesh: The updated mesh after inference.
+        Np: The updated normals of the mesh after inference.
+    """
     # 1.load data
     mesh_noisy = om.read_trimesh(filename)
     points_noisy = mesh_noisy.points().astype(np.float32)
@@ -72,12 +101,31 @@ def inference(filename, net, device, sub_size, data_type=None):
     return om.TriMesh(V.numpy(), mesh_noisy.fv_indices()), Np
 
 def evaluate_one_mesh(filename, net, device, sub_size, rst_filename=None, filename_gt=None):
-    from loss import error_n
+    """
+    Evaluate a mesh using a neural network model.
+
+    Parameters:
+    - filename: str, the file name of the mesh to be evaluated
+    - net: neural network model, the model used for evaluation
+    - device: str, the device on which the evaluation will be performed
+    - sub_size: int, the size of the sub-meshes for evaluation
+    - rst_filename: str, optional, the file name for the resulting mesh
+    - filename_gt: str, optional, the file name of the ground truth mesh for comparison
+
+    Returns:
+    - angle1: float, the error angle between the predicted normals and the ground truth normals
+    - angle2: float, the error angle between the computed normals and the ground truth normals
+    - Np.shape[0]: int, the number of faces in the denoised mesh
+    - vertice_distance: float, the error distance between the predicted vertices and the ground truth vertices
+    - V.shape[0]: int, the number of vertices in the denoised mesh
+    """
+    from loss import error_n, error_v
 
     denoised_mesh, Np = inference(filename, net, device, sub_size)
     V = torch.tensor(denoised_mesh.points().astype(float))
     fv_indices = torch.from_numpy(denoised_mesh.fv_indices()).long()
-    om.write_mesh(F"{rst_filename[:-4]}-60.obj",
+    if rst_filename is not None:
+        om.write_mesh(F"{rst_filename[:-4]}-60.obj",
                   denoised_mesh)
     
 
@@ -89,10 +137,71 @@ def evaluate_one_mesh(filename, net, device, sub_size, rst_filename=None, filena
         angle1 = error_n(Np, Nt)
         Np2 = data_utils.compute_face_normal(V, fv_indices)
         angle2 = error_n(Np2, Nt)
-    return angle1, angle2, Np.shape[0]
+        vertice_distance = error_v(V, torch.from_numpy(mesh_o.points().astype(float)).float())
+    return angle1, angle2, Np.shape[0], vertice_distance, V.shape[0]
 
+def evaluate_two_dir(original_data_dir, denoised_data_dir):
+
+    log_file = os.path.join(denoised_data_dir,"log_evaluate_two_dir.txt")
+    filenames = []
+    filenames_gt = []
+    data_list = glob.glob(os.path.join(original_data_dir, '*.obj'))
+    data_names = [os.path.basename(original_file)[:-4] for original_file in data_list]
+    for data_name in data_names:
+        noisy_files = glob.glob(os.path.join(denoised_data_dir, f"{data_name}_n*.obj"))
+        for noisy_file in noisy_files:
+            filenames.append(noisy_file)
+            filenames_gt.append(os.path.join(original_data_dir, f"{data_name}.obj"))
+
+    error_all = np.zeros((4, len(filenames)))  # count, mean_error
+    for i,(filename, filename_gt) in enumerate(zip(filenames, filenames_gt)):
+        original_mesh = om.read_trimesh(filename_gt)
+        denoised_mesh = om.read_trimesh(filename)
+        original_mesh.update_face_normals()
+        denoised_mesh.update_face_normals()
+
+        normal_original_mesh = torch.from_numpy(original_mesh.face_normals()).float()
+        normal_denoised_mesh = torch.from_numpy(denoised_mesh.face_normals()).float()
+        num_faces = normal_original_mesh.shape[0]
+        angle = error_n(normal_original_mesh, normal_denoised_mesh)
+
+        vertice_original_mesh = torch.from_numpy(original_mesh.points().astype(float))
+        vertice_denoised_mesh = torch.from_numpy(denoised_mesh.points().astype(float))
+        num_vertices = vertice_original_mesh.shape[0]
+        vertice_distance = error_v(vertice_original_mesh, vertice_denoised_mesh)
+
+        error_all[0, i] = num_faces
+        error_all[1, i] = angle
+        error_all[2, i] = vertice_original_mesh.shape[0]
+        error_all[3, i] = vertice_distance
+        result_one_mesh = (F"\nangle: {angle:9.6f},  faces: {num_faces:>6}, vertice_distance: {vertice_distance:9.6f}, vertices:{num_vertices}, '{os.path.basename(filename)}'")
+
+        print(result_one_mesh)
+        f = open(f"{log_file}", "a")
+        f.write(result_one_mesh)
+        f.close()
+
+    count_faces = error_all[0].sum().astype(np.int32)
+    error_mean = (error_all[0]*error_all[1]).sum() / count_faces
+    count_vertices = error_all[2].sum().astype(int)
+    error_vertice_mean = (error_all[2]*error_all[3]).sum() / count_vertices
+    result = (f"\nNum_face: {count_faces:>6},  angle_mean: {error_mean:.6f}, Num_vertice: {count_vertices}, vertice_mean: {error_vertice_mean:.6f} ")
+
+    print(result)
+    f = open(f"{log_file}", "a")
+    f.write(result)
+    f.close()
 
 def evaluate_dir(params_path, data_dir=None, sub_size=None, gpu=-1, write_to_file=False):
+    """
+    A function to evaluate a directory of data using a given set of parameters.
+
+    :param params_path: The path to the parameters file.
+    :param data_dir: The directory containing the data to be evaluated. Default is None.
+    :param sub_size: The size of the sub-data. Default is None.
+    :param gpu: The GPU index. Default is -1.
+    :param write_to_file: Whether to write the results to a file. Default is False.
+    """
     assert (data_dir is None or os.path.exists(data_dir))
 
     opt = torch.load(params_path)
@@ -137,27 +246,31 @@ def evaluate_dir(params_path, data_dir=None, sub_size=None, gpu=-1, write_to_fil
     net.eval()
 
     # 3. infer
-    error_all = np.zeros((3, len(filenames)))  # count, mean_error
+    error_all = np.zeros((5, len(filenames)))  # count, mean_error
     for i, noisy_file in enumerate(filenames):
         rst_file = os.path.join(result_dir, os.path.basename(noisy_file))
         # if os.path.exists(rst_file):
         #     continue
-        angle1, angle2, count = evaluate_one_mesh(noisy_file, net, device, sub_size, rst_file, None if len(
+        angle1, angle2, num_faces, vertice_distance, num_vertice = evaluate_one_mesh(noisy_file, net, device, sub_size, rst_file, None if len(
             filenames_gt) == 0 else filenames_gt[i])
-        error_all[0, i] = count
+        error_all[0, i] = num_faces
         error_all[1, i] = angle1
         error_all[2, i] = angle2
-        result_one_mesh = (F"\nangle1: {angle1:9.6f},  angle2: {angle2:9.6f},  faces: {count:>6},  '{os.path.basename(noisy_file)}'")
+        error_all[3, i] = num_vertice
+        error_all[4, i] = vertice_distance
+        result_one_mesh = (F"\nangle1: {angle1:9.6f},  angle2: {angle2:9.6f},  faces: {num_faces:>6}, vertice_distance: {vertice_distance:9.6f}, vertices:{num_vertice}, '{os.path.basename(noisy_file)}'")
         print(result_one_mesh)
         if write_to_file:
             f = open(f"{log_file}", "a")
             f.write(result_one_mesh)
             f.close()
 
-    count_sum = error_all[0].sum().astype(np.int32)
-    error_mean1 = (error_all[0]*error_all[1]).sum() / count_sum
-    error_mean2 = (error_all[0]*error_all[2]).sum() / count_sum
-    result = (f"\nNum_face: {count_sum:>6},  angle_mean1: {error_mean1:.6f},  angle_mean2: {error_mean2:.6f}")
+    count_faces = error_all[0].sum().astype(np.int32)
+    error_mean1 = (error_all[0]*error_all[1]).sum() / count_faces
+    error_mean2 = (error_all[0]*error_all[2]).sum() / count_faces
+    count_vertices = error_all[3].sum().astype(int)
+    error_vertice_mean = (error_all[3]*error_all[4]).sum() / count_vertices
+    result = (f"\nNum_face: {count_faces:>6},  angle_mean1: {error_mean1:.6f},  angle_mean2: {error_mean2:.6f}, Num_vertice: {count_vertices}, vertice_mean: {error_vertice_mean:.6f} ")
     print(result)
     if write_to_file:
         f = open(f"{log_file}", "a")
@@ -166,6 +279,20 @@ def evaluate_dir(params_path, data_dir=None, sub_size=None, gpu=-1, write_to_fil
     print("\n--- end ---")
 
 def denoise_dir(model_path, data_dir, sub_size=20000, force_depth=False, pool_type='max', wei_param=2):
+    """
+    Denoise the files in the given directory using the specified model and parameters.
+
+    Args:
+        model_path (str): The path to the denoising model.
+        data_dir (str): The directory containing the input noisy files.
+        sub_size (int, optional): The size of the subset of the files to process at a time. Defaults to 20000.
+        force_depth (bool, optional): Whether to force the depth during denoising. Defaults to False.
+        pool_type (str, optional): The type of pooling to be used. Defaults to 'max'.
+        wei_param (int, optional): The weight parameter. Defaults to 2.
+
+    Returns:
+        None
+    """
     # 1. prepare data
     filenames = glob.glob(os.path.join(data_dir, '*.obj'))
 
@@ -210,6 +337,6 @@ if __name__ == "__main__":
     print("-------------------------------")
     print(opt)
 
-    evaluate_dir(opt.params_path, data_dir=opt.data_dir,
-                sub_size=opt.sub_size, gpu=opt.gpu, write_to_file=True)
+    # evaluate_dir(opt.params_path, data_dir=opt.data_dir,sub_size=opt.sub_size, gpu=opt.gpu, write_to_file=True)
+    evaluate_two_dir(r"G:\My Drive\data\original",r"G:\My Drive\data\denoise_ours")
 
