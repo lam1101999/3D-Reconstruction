@@ -5,10 +5,17 @@ sys.path.insert(0, path)
 import pyvista as pv
 import streamlit as st
 from stpyvista import stpyvista
+from stpyvista.utils import is_the_app_embedded 
 import torch
 import openmesh as om
 from test_result import inference
 from network import DualGenerator
+
+# Initial configuration
+pv.start_xvfb()
+st.session_state.is_app_embedded = st.session_state.get(
+    "is_app_embedded", is_the_app_embedded()
+)
 def render_mesh(mesh_file, model):
    if mesh_file is not None:
 
@@ -47,11 +54,11 @@ def render_mesh(mesh_file, model):
             plotter_denoised.view_isometric()
             stpyvista(plotter_denoised, key=f"{mesh_file.name}_denoised")
 def main():
-    # from stpyvista.utils import start_xvfb
+    from stpyvista.utils import start_xvfb
 
-    # if "IS_XVFB_RUNNING" not in st.session_state:
-    #     start_xvfb()
-    #     st.session_state.IS_XVFB_RUNNING = True 
+    if "IS_XVFB_RUNNING" not in st.session_state:
+        start_xvfb()
+        st.session_state.IS_XVFB_RUNNING = True 
 
     st.title("Remove Noise")
     # Upload mesh file
