@@ -30,7 +30,7 @@ def render_mesh(mesh_file, model):
 
         ## denoise mesh
         denoised_mesh_file_temp = "./denoised_temp.obj"
-        denoised_mesh,_ = inference(noisy_mesh_file_temp, model)
+        denoised_mesh,_ = inference(noisy_mesh_file_temp, model, sub_size=1000)
         om.write_mesh(denoised_mesh_file_temp, denoised_mesh)
         denoised_mesh = pv.read(denoised_mesh_file_temp)
 
