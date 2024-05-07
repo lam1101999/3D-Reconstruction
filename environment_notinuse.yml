@@ -1,0 +1,20 @@
+name: myenv
+channels:
+  - conda-forge
+dependencies:
+  - python=3.8
+  - pyvista
+  - streamlit
+  - stpyvista
+  - numpy
+  - matplotlib
+  - cmake
+  - openmesh
+  - pip
+  - torch==2.1.0+cu118
+  - torch_geometric
+  - torch-scatter
+  - torch-cluster
+  - torch-sparse
+  - openmesh
+  - pip
