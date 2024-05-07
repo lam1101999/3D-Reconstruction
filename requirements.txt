@@ -6,7 +6,7 @@ pyvista
 streamlit
 stpyvista 
 --extra-index-url https://download.pytorch.org/whl/cu118
-torch
+torch=2.1.0
 torch_geometric
 numpy
 matplotlib
