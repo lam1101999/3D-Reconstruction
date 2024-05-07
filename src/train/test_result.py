@@ -6,7 +6,7 @@ import argparse
 import numpy as np
 import openmesh as om
 import torch
-import data_utils
+import data_utils as data_utils
 from datetime import datetime
 from typing import Union
 from dataset import DualDataset
