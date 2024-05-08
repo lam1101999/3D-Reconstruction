@@ -28,18 +28,21 @@ def render_mesh(mesh_file, model):
         plotter_noisy.background_color = "#f0f8ff"
         plotter_denoised = pv.Plotter(border=True, window_size=[400, 400])
         plotter_denoised.background_color = "#f0f8ff"
+        progress_bar.progress(20)
 
         ## read mesh from file 
         noisy_mesh_file_temp = "./temp.obj"
         with open(noisy_mesh_file_temp, "wb") as f: 
             f.write(mesh_file.getbuffer())
         noisy_mesh = pv.read(noisy_mesh_file_temp)
+        progress_bar.progress(50)
 
         ## denoise mesh
         denoised_mesh_file_temp = "./denoised_temp.obj"
         denoised_mesh,_ = inference(noisy_mesh_file_temp, model, sub_size=1000)
         om.write_mesh(denoised_mesh_file_temp, denoised_mesh)
         denoised_mesh = pv.read(denoised_mesh_file_temp)
+        progress_bar.progress(90)
 
         ## clear temp file
         os.remove(noisy_mesh_file_temp)
