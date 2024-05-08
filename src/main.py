@@ -58,7 +58,7 @@ def render_mesh(mesh_file, model):
             plotter_denoised.view_isometric()
             stpyvista(plotter_denoised, key=f"{mesh_file.name}_denoised")
 
-@st.cache
+@st.cache_resource
 def load_model():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model_weight_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "weights")
@@ -87,7 +87,7 @@ def main():
     if st.sidebar.button('Reset'):
         st.session_state["file_uploader_key"] += 1
         st.rerun()
-        
+
     # Prepare model
     model = load_model()
 
