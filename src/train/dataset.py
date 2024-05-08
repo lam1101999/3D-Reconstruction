@@ -218,10 +218,70 @@ class DualDataset(torch_geometric.data.Dataset):
                     seed = left_idx[idx_temp] # convert it from temp idx to global face index
                 else:
                     break
+        return all_dual_data
+
+    @staticmethod
+    def process_one_data_from_mesh(mesh, submesh_size):
+        """
+        This function processes one data from the mesh.
+
+        Parameters:
+        data (dict): The data to be processed. The data should be a dictionary with the following keys:
+            - 'mesh' (TriMesh): the mesh.
+            - 'submesh_size' (int): The size of the submesh.
+
+        Returns:
+            list: A list of tuples containing the processed data. This is because mesh can be split into smaller submeshes.
+                Each tuple contains (noisy data, original data:optional), v_idx:optional, select_face:optional.
+        """
+        filter_patch_count = 0
+        
+        # 1. load data
+        points = mesh.points().astype(np.float32)
+        
+        # 2. center and scale, record
+        # print(points.shape)
+        # print(mesh.ev_indices().shape)
+        _, centroid, scale = data_utils.center_and_scale(points, mesh.ev_indices(), 0)
+        
+        # 3. split to submesh
+        all_dual_data = []
+        if mesh.n_faces() <= submesh_size:
+            dual_data = DualDataset.process_one_submesh(mesh)
+            dual_data[0].centroid = torch.from_numpy(centroid).float()
+            dual_data[0].scale = scale
+            all_dual_data.append((dual_data, None, None))
+        else:
+            flag = np.zeros(mesh.n_faces(), dtype=bool)
+            
+            fv_indices =  mesh.fv_indices()
+            vf_indices = mesh.vf_indices()
+            face_center = points[fv_indices].mean(1)
+            seed = np.argmax(((face_center-centroid)**2).sum(1)) # find index of face farthest to centroid
+            for sub_num in range(1, sys.maxsize):
+                # Select patch facet indices
+                select_faces = data_utils.mesh_get_neighbor_np(fv_indices, vf_indices,seed,submesh_size)
+                flag.put(select_faces, True)
+                
+                if len(select_faces) > filter_patch_count:
+                    # split submesh based on facet indices
+                    v_idx, f = data_utils.get_submesh(fv_indices, select_faces)
+                    submesh_n = om.TriMesh(points[v_idx], f)
+                    dual_data = DualDataset.process_one_submesh(submesh_n)
+                    dual_data[0].centroid = torch.from_numpy(centroid).float()
+                    dual_data[0].scale = scale
+                    all_dual_data.append((dual_data, v_idx, select_faces))
+                # whether all facets of current seed have been visited, next seed
+                left_idx = np.where(~flag)[0] # find unvisited faces
+                if left_idx.size:
+                    idx_temp = np.argmax(((face_center[left_idx] - centroid)**2).sum(1)) # find remaining face farthest to centroid
+                    seed = left_idx[idx_temp] # convert it from temp idx to global face index
+                else:
+                    break
         return all_dual_data   
 
     @staticmethod
-    def process_one_submesh(noisy_mesh, file_name, original_mesh=None):
+    def process_one_submesh(noisy_mesh, file_name="", original_mesh=None):
         """
         Process one submesh and generate graph data for vertex and facet graphs.
         

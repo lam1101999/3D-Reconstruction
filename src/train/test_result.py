@@ -38,6 +38,68 @@ def predict_one_submesh(net, device, dual_data):
         vert_p, norm_p, alpha = net(dual_data)
         return vert_p, norm_p
 
+def inference_from_mesh(mesh, net, device:Union[str,torch.device]="cpu", sub_size=20000, data_type=None):
+    """
+    Perform inference on a given mesh using the provided neural network.
+
+    Args:
+        mesh (openmesh.TriMesh): TriMesh object to be processed.
+        net: The neural network model to be used for inference.
+        device: The device on which the inference will be performed.
+        sub_size: The size of the submesh for processing.
+        data_type (optional): The type of data used for post-processing.
+
+    Returns:
+        om.TriMesh: The updated mesh after inference.
+        Np: The updated normals of the mesh after inference.
+    """
+    # 1.load data
+    mesh_noisy = mesh
+    points_noisy = mesh_noisy.points().astype(np.float32)
+
+    # 2.process entire mesh
+    all_data = DualDataset.process_one_data_from_mesh(
+        mesh_noisy, sub_size)
+    centroid = all_data[0][0][0].centroid
+    scale = all_data[0][0][0].scale
+
+    # 3.inference
+    if len(all_data) == 1:
+        dual_data = all_data[0][0]
+        dual_data = DualDataset.post_processing(dual_data, data_type)
+        Vp, Np = predict_one_submesh(net, device, dual_data)
+    else:
+        sum_v = torch.zeros((mesh_noisy.n_vertices(), 1),
+                            dtype=torch.int8, device=device)
+        Vp = torch.zeros((mesh_noisy.n_vertices(), 3),
+                         dtype=torch.float32, device=device)
+        Np = torch.zeros((mesh_noisy.n_faces(), 3),
+                         dtype=torch.float32, device=device)
+
+        for dual_data, V_idx, F_idx in all_data:
+            dual_data = DualDataset.post_processing(dual_data, data_type)
+            vert_p, norm_p = predict_one_submesh(net, device, dual_data)
+            sum_v[V_idx] += 1
+            Vp[V_idx] += vert_p
+            Np[F_idx] += norm_p
+
+        Vp /= sum_v
+        Np = torch.nn.functional.normalize(Np, dim=1)
+
+    Vp = Vp.cpu() / scale + centroid
+    Np = Np.cpu()
+
+    # 4.update position and save
+    fv_indices = torch.from_numpy(mesh_noisy.fv_indices()).long()
+    vf_indices = torch.from_numpy(mesh_noisy.vf_indices()).long()
+    depth_direction = None
+    if data_type in ['Kinect_v1', 'Kinect_v2']:
+        depth_direction = torch.nn.functional.normalize(
+            torch.from_numpy(points_noisy), dim=1)
+    V = data_utils.update_position2(
+        Vp, fv_indices, vf_indices, Np, 60, depth_direction=depth_direction)
+    return om.TriMesh(V.numpy(), mesh_noisy.fv_indices()), Np
+
 def inference(filename, net, device:Union[str,torch.device]="cpu", sub_size=20000, data_type=None):
     """
     Perform inference on a given mesh using the provided neural network.
