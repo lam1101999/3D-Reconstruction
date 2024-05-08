@@ -41,6 +41,10 @@ def render_mesh(mesh_file, model):
         om.write_mesh(denoised_mesh_file_temp, denoised_mesh)
         denoised_mesh = pv.read(denoised_mesh_file_temp)
 
+        ## clear temp file
+        os.remove(noisy_mesh_file_temp)
+        os.remove(denoised_mesh_file_temp)
+
         ## Update progress bar
         progress_bar.progress(100)
 
@@ -53,6 +57,18 @@ def render_mesh(mesh_file, model):
             plotter_denoised.add_mesh(denoised_mesh, color="orange")
             plotter_denoised.view_isometric()
             stpyvista(plotter_denoised, key=f"{mesh_file.name}_denoised")
+
+@st.cache
+def load_model():
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model_weight_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "weights")
+    model_name = "GeoBi-GNN_Synthetic_model.pth"
+    model = DualGenerator(force_depth=False,
+                          pool_type="max", wei_param=2)
+    model.load_state_dict(torch.load(os.path.join(model_weight_folder, model_name), map_location=device))
+    model = model.to(device)
+    return model
+
 def main():
     from stpyvista.utils import start_xvfb
 
@@ -61,6 +77,7 @@ def main():
         st.session_state.IS_XVFB_RUNNING = True 
 
     st.title("Remove Noise")
+
     # Upload mesh file
     if "file_uploader_key" not in st.session_state:
         st.session_state["file_uploader_key"] = 0
@@ -70,14 +87,10 @@ def main():
     if st.sidebar.button('Reset'):
         st.session_state["file_uploader_key"] += 1
         st.rerun()
+        
     # Prepare model
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model_weight_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "weights")
-    model_name = "GeoBi-GNN_Synthetic_model.pth"
-    model = DualGenerator(force_depth=False,
-                          pool_type="max", wei_param=2)
-    model.load_state_dict(torch.load(os.path.join(model_weight_folder, model_name), map_location=device))
-    model = model.to(device)
+    model = load_model()
+
     if mesh_files is not None:
         for mesh_file in mesh_files:
             render_mesh(mesh_file, model)
