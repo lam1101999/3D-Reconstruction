@@ -8,7 +8,6 @@ import streamlit as st
 from stpyvista import stpyvista
 import torch
 import openmesh as om
-import tempfile
 import numpy as np
 
 
