@@ -358,7 +358,7 @@ def denoise_dir(model_path, data_dir, sub_size=20000, force_depth=False, pool_ty
     # 1. prepare data
     filenames = glob.glob(os.path.join(data_dir, '*.obj'))
 
-    print(F"\Denoise , sub_size:{sub_size}, {len(filenames)} files ...\n")
+    print(F"\nDenoise , sub_size:{sub_size}, {len(filenames)} files ...\n")
     result_dir = data_dir + "_result"
     os.makedirs(result_dir, exist_ok=True)
 
@@ -370,7 +370,7 @@ def denoise_dir(model_path, data_dir, sub_size=20000, force_depth=False, pool_ty
     import network
     net = network.DualGenerator(force_depth=force_depth,
                           pool_type=pool_type, wei_param=wei_param)
-    net.load_state_dict(torch.load(model_path))
+    # net.load_state_dict(torch.load(model_path))
     net = net.to(device)
     net.eval()
 
@@ -400,5 +400,6 @@ if __name__ == "__main__":
     print(opt)
 
     # evaluate_dir(opt.params_path, data_dir=opt.data_dir,sub_size=opt.sub_size, gpu=opt.gpu, write_to_file=True)
-    evaluate_two_dir(r"G:\My Drive\data\original",r"G:\My Drive\data\denoise_ours")
+    denoise_dir(r"E:\thesis\3D-Reconstruction\dataset\Research_Dataset\train\GeoBi-GNN_All_model1.pth", r"E:\thesis\3D-Reconstruction\dataset\Research_Dataset\train\original" )
+    # evaluate_two_dir(r"G:\My Drive\data\original",r"G:\My Drive\data\denoise_ours")
 

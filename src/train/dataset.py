@@ -308,7 +308,7 @@ class DualDataset(torch_geometric.data.Dataset):
         # vertex graph
         position_v = torch.from_numpy(noisy_mesh.points()).float()
         normal_v = torch.from_numpy(noisy_mesh.vertex_normals()).float()
-        normal_f = normal_v if len(normal_v.size())==2 else normal_v.unsqueeze(0)
+        normal_v = normal_v if len(normal_v.size())==2 else normal_v.unsqueeze(0)
         edge_idx_v = ev_indices.T # directed graph, no self_loops
         edge_idx_v = to_undirected(edge_idx_v)
         edge_idx_v,_ = add_self_loops(edge_idx_v)

@@ -303,7 +303,8 @@ def train(opt):
         restore_params = dict()
 
     # backup code
-    shutil.copytree(CODE_DIR, os.path.join(log_dir, 'code_bak'))
+    if not os.path.exists(os.path.join(log_dir,"code_bak")):
+        shutil.copytree(CODE_DIR, os.path.join(log_dir, 'code_bak'))
 
     # tensorboard
     train_writer = SummaryWriter(os.path.join(log_dir, 'train'))
@@ -362,6 +363,7 @@ def train(opt):
         # Log info
         last_lr = optimizer_generator.param_groups[0]['lr']
         span = datetime.now() - time_start
+        time_start = datetime.now()
         str_log = F"Epoch {epoch:>3}: {str(span).split('.')[0]:>8}  loss:{eval_loss_v:.4f} {eval_loss_f:.4f} | "
         str_log += F"error:{eval_error_v:.4f} {eval_error_f:.4f}  lr:{last_lr:.4e}"
 
