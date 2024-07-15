@@ -1,0 +1,10 @@
+==========================================================================================
+Load processed information!
+Load processed information!
+train_dataset: 356 samples
+Testing set: 916 samples
+Total parameters:  939128
+cuda
+Epoch   0:  0:15:11  loss:0.0211 0.1712 | error:0.0129 6.5435  lr:1.0000e-03 - save model
+Epoch   1:  0:29:59  loss:0.0231 0.1594 | error:0.0137 6.1322  lr:9.9990e-04 - save model
+Epoch   3:  0:59:28  loss:0.0202 0.1566 | error:0.0130 6.0357  lr:9.9970e-04 - save model

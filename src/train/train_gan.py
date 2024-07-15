@@ -21,7 +21,7 @@ def parse_argument():
     parser = argparse.ArgumentParser()
     IS_DEBUG = getattr(sys,"gettrace", None) is not None and sys.gettrace()
     if IS_DEBUG:
-        parser.add_argument("--data_type", type=str, default="Synthetic", help="Data type for training [default:Research_Data]")
+        parser.add_argument("--data_type", type=str, default="All", help="Data type for training [default:Research_Data]")
         parser.add_argument('--flag', type=str, default="train", help='Training flag')  
     else:
         parser.add_argument('--data_type', type=str,required=True, help='Data type for training')  

@@ -5,14 +5,15 @@
 pyvista
 streamlit
 stpyvista 
---extra-index-url https://download.pytorch.org/whl/cu118
+--extra-index-url https://download.pytorch.org/whl/cpu
 torch==2.1.0
 torch_geometric
 numpy
 matplotlib
 cmake
 openmesh
+tensorboard
 torch-scatter 
 torch-cluster
--f https://data.pyg.org/whl/torch-2.1.0+cu118.html
+-f https://data.pyg.org/whl/torch-2.1.0+cpu.html
 torch-sparse

@@ -1,0 +1,3 @@
+Namespace(batch_size=1, beta1=0.9, beta2=0.999, data_type='All', filter_patch_count=100, flag='train', force_depth=False, last_epoch=None, loss_n='cos', loss_n_scale=1, loss_v='L1', loss_v_scale=1, lr=0.001, lr_decay=0.999, lr_sch='lmd', lr_step=[10], max_epoch=1000, optimizer='adam', pool_type='max', restore=0, restore_time=None, seed=3436, sub_size=20000, wei_param=2, weight_decay=0)
+==========================================================================================
+Processing...

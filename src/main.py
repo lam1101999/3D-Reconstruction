@@ -67,7 +67,8 @@ def render_mesh(mesh_file, model, device="cpu"):
             progress_bar.progress(90)
         finally:
             f.close()
-            os.remove(noisy_mesh_file_temp)
+            if os.path.exists(noisy_mesh_file_temp):
+                os.remove(noisy_mesh_file_temp)
 
         ## Update progress bar
         progress_bar.progress(100)
@@ -87,6 +88,7 @@ def load_model():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model_weight_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "weights")
     model_name = "GeoBi-GNN_Synthetic_model.pth"
+    # model_name = "GeoBi-GNN_All_model.pth"
     model = DualGenerator(force_depth=False,
                           pool_type="max", wei_param=2)
     model.load_state_dict(torch.load(os.path.join(model_weight_folder, model_name), map_location=device))
